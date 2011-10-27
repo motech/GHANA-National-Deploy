@@ -77,7 +77,8 @@
              classpathref="dependencies"
              password="${mysql.openmrs.password}">
 	    <fileset dir="./sql">
-      		<include name="*.sql"/>
+      		<include name="openmrs-1.8.sql"/>
+      		<include name="1.insert_email_person_attribute_type_table.sql"/>
     	    </fileset>             
         </sql>
         <echo message="recreated schema for ${mysql.openmrs.db.name}"/>
