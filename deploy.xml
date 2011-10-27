@@ -62,9 +62,9 @@
         </path>
         <sql driver="${mysql.driver}"
              url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.openmrs.db.name}?autoReconnect=true"
-             userid="${mysql.openmrs.user}"
+             userid="${mysql.user}"
              classpathref="dependencies"
-             password="${mysql.openmrs.password}">
+             password="${mysql.password}">
             drop database ${mysql.openmrs.db.name};
             create database ${mysql.openmrs.db.name} default charset utf8;
             grant all on  ${mysql.openmrs.db.name}.* to '${mysql.openmrs.user}'@'localhost' identified by '${mysql.openmrs.password}';
