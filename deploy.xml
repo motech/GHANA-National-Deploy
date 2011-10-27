@@ -151,7 +151,7 @@
              							drop.national.db,    
              							load.quartz.schema, 
              							load.openmrs.schema
-								download.national.from.nexus, 
+,								download.national.from.nexus, 
 								copy.national.to.tomcat, 
 								start.tomcat, 
 								set.properties,
