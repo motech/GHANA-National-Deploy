@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="ghana-national" basedir=".">
+    <import file="${basedir}/tomcat-tasks.xml"/>
+
+    <!-- *********************** DOWNLOAD ARTIFACTS************************* -->
+    <target name="download.national.from.hudson">
+        <copy todir="${download.dir}" flatten="true" overwrite="true">
+            <resources>
+                <url url="http://${hudson.server}:${hudson.port}/job/${hudson.job.name}/${hudson.build.number}/org.motechproject$GHANA-National/artifact/org.motechproject/GHANA-National/${hudson.release.version}/GHANA-National-${hudson.release.version}.war"/>
+            </resources>
+        </copy>
+        <move file="${download.dir}/GHANA-National-${hudson.release.version}.war" tofile="${download.dir}/${app.name}.war"/>
+        <echo message="downloaded GHANA-National-${hudson.release.version}.war from hudson"/>
+    </target>
+
+    <target name="download.national.from.nexus">
+        <copy todir="${download.dir}" flatten="true" overwrite="true">
+            <resources>
+                <url url="http://${nexus.server}:${nexus.port}/content/repositories/releases/org/motechproject/ghana-national/${nexus.release.version}/ghana-national-${nexus.release.version}.war"/>
+            </resources>
+        </copy>
+        <move file="${download.dir}/ghana-national-${nexus.release.version}.war" tofile="${download.dir}/${app.name}.war"/>
+        <echo message="downloaded ghana-national-${nexus.release.version}.war from nexus"/>
+    </target>
+
+    <!-- *************************RECREATE COUCHDB************************* -->
+    <target name="drop.national.db">
+        <exec executable="curl">
+            <arg value="-s"/>
+            <arg value="-S"/>
+            <arg value="-X"/>
+            <arg value="DELETE"/>
+            <arg value="http://${couchdb.server}:${couchdb.port}/${couchdb.national.db}"/>
+        </exec>
+    </target>	
+    
+    <!-- *************************RECREATE MYSQL************************* -->
+    <target name="load.quartz.schema">
+        <path id="dependencies">
+            <fileset file="./lib/mysql-connector-java-5.1.13.jar"/>
+        </path>
+        <sql driver="${mysql.driver}"
+             url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.db.name}?autoReconnect=true"
+             userid="${mysql.user}"
+             classpathref="dependencies"
+             password="${mysql.password}">
+            drop database ${mysql.db.name};
+            create database ${mysql.db.name};
+        </sql>
+        <sql driver="${mysql.driver}"
+             url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.db.name}?autoReconnect=true"
+             userid="${mysql.user}"
+             classpathref="dependencies"
+             password="${mysql.password}"
+             src="./sql/tables_mysql_innodb.sql">
+        </sql>
+        <echo message="recreated schema for ${mysql.db.name}"/>
+    </target>
+    <target name="load.openmrs.schema">
+        <path id="dependencies">
+            <fileset file="./lib/mysql-connector-java-5.1.13.jar"/>
+        </path>
+        <sql driver="${mysql.driver}"
+             url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.openmrs.db.name}?autoReconnect=true"
+             userid="${mysql.openmrs.user}"
+             classpathref="dependencies"
+             password="${mysql.openmrs.password}">
+            drop database ${mysql.openmrs.db.name};
+            create database ${mysql.openmrs.db.name} default charset utf8;
+            grant all on  ${mysql.openmrs.db.name}.* to '${mysql.openmrs.user}'@'localhost' identified by '${mysql.openmrs.password}';
+            grant all on  ${mysql.openmrs.db.name}.* to '${mysql.openmrs.user}'@'%' identified by '${mysql.openmrs.password}';
+            flush privileges;
+        </sql>
+        <sql driver="${mysql.driver}"
+             url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.openmrs.db.name}?autoReconnect=true"
+             userid="${mysql.openmrs.user}"
+             classpathref="dependencies"
+             password="${mysql.openmrs.password}">
+	    <fileset dir="./sql">
+      		<include name="*.sql"/>
+    	    </fileset>             
+        </sql>
+        <echo message="recreated schema for ${mysql.openmrs.db.name}"/>
+    </target>
+    <!-- *************************SET PROPERTIES************************* -->
+    <target name="set.hudson.version">
+        <echo file="${tomcat.home}/webapps/${app.name}/META-INF/version.txt">
+            hudson.release.version=${hudson.release.version}
+            hudson.build.number=${hudson.build.number}
+            deploy.time=${cctimestamp}
+        </echo>
+    </target>
+    <target name="set.nexus.version">
+        <echo file="${tomcat.home}/webapps/${app.name}/META-INF/version.txt">
+            nexus.server=${nexus.server}
+            nexus.release.version=${nexus.release.version}
+            deploy.time=${cctimestamp}
+        </echo>
+    </target>
+
+    <target name="set.properties">
+        <copy overwrite="true" todir="${tomcat.home}/webapps/${app.name}/WEB-INF/classes"
+              file="${basedir}/properties/${env}/couchdb.properties"/>
+        <copy overwrite="true" todir="${tomcat.home}/webapps/${app.name}/WEB-INF/classes"
+              file="${basedir}/properties/${env}/date.properties"/>
+        <copy overwrite="true" todir="${tomcat.home}/webapps/${app.name}/WEB-INF/classes"
+              file="${basedir}/properties/${env}/quartz.properties"/>
+        <copy overwrite="true" todir="${tomcat.home}/webapps/${app.name}/WEB-INF/classes"
+              file="${basedir}/properties/${env}/log4j.xml"/>
+        <copy overwrite="true" todir="${tomcat.home}/webapps/${app.name}/WEB-INF/classes"
+              file="${basedir}/properties/${env}/openmrs.properties"/>
+        <copy overwrite="true" todir="${tomcat.home}/webapps/${app.name}/WEB-INF/classes"
+              file="${basedir}/properties/${env}/forms-config.json"/>            
+    </target>
+
+    <!-- ************************LOAD SEED DATA ************************* -->
+    <path id="lib.path">
+        <fileset dir="${tomcat.home}/webapps/${app.name}/WEB-INF/lib" includes="**/*.jar"/>
+    </path>
+
+    <target name="load.seed.data">
+        <echo message="please wait ..."/>
+        <java fork="false" classname="${couchdb.seed.main.class}">
+            <classpath>
+                <path location="${tomcat.home}/webapps/${app.name}/WEB-INF/classes"/>
+                <path refid="lib.path"/>
+            </classpath>
+        </java>
+        <echo message="seed data loaded into ${couchdb.national.db} database"/>
+    </target>
+
+    <!-- *************************DEPLOY TARGETS************************* -->
+    <target name="deploy.national.from.hudson.and.reset.db" depends="stop.tomcat, 
+             							 drop.national.db,             							
+             							 load.quartz.schema, 
+             							 load.openmrs.schema,
+								 download.national.from.hudson, 
+								 copy.national.to.tomcat, 
+								 start.tomcat, 	
+								 set.properties,
+								 set.hudson.version,
+								 load.seed.data,
+								 restart.tomcat"
+            description="Deploy national by 
+                         1) fetching artifact from hudson, 
+                         2) recreate national couchdb database with seed data
+                         3) clearing quartz mysql jobdatastore
+			 4) set properties for war"/>
+
+    <target name="deploy.national.from.nexus.and.reset.db" depends="stop.tomcat, 
+             							drop.national.db,    
+             							load.quartz.schema, 
+             							load.openmrs.schema
+								download.national.from.nexus, 
+								copy.national.to.tomcat, 
+								start.tomcat, 
+								set.properties,
+								set.nexus.version,
+								load.seed.data,
+								restart.tomcat"
+            description="Deploy national by 
+                         1) fetching artifact from nexus, 
+                         2) recreate national couchdb database with seed data
+                         3) clearing quartz mysql jobdatastore
+                         4) set properties for war"/>
+
+    <target name="deploy.national.from.hudson" depends="stop.tomcat, 
+ 						    download.national.from.hudson, 
+						    copy.national.to.tomcat,
+						    start.tomcat, 						   
+					            set.properties,
+						    set.hudson.version,
+						    load.seed.data,
+						    restart.tomcat"
+            description="Deploy national from hudson without recreating database and seed data"/>
+
+    <target name="deploy.national.from.nexus" depends="stop.tomcat, 
+						   download.national.from.nexus, 
+						   copy.national.to.tomcat, 
+ 						   start.tomcat, 						 
+					           set.properties,
+						   set.nexus.version,
+						   load.seed.data,
+						   restart.tomcat"
+            description="Deploy national from nexus without recreating database and seed data"/>
+
+    <target name="deploy.national.from.local" depends="stop.tomcat, 
+					  	   copy.local.war,
+ 						   start.tomcat, 						
+					           set.properties,
+					           load.seed.data,
+						   restart.tomcat"
+            description="Deploy national from locally downloaded war(set 'local.war.file' in deploy.properties) in artifacts folder without recreating database and seed data"/>
+
+    <target name="deploy.national.from.local.and.reset.db" depends="stop.tomcat,
+                                                   drop.national.db,                                           
+                                                   load.quartz.schema, 
+                                                   load.openmrs.schema,
+					  	   copy.local.war,
+ 						   start.tomcat,						  
+					           set.properties,
+						   load.seed.data,
+						   restart.tomcat"
+            description="Deploy national from locally downloaded war(set 'local.war.file' in deploy.properties) in artifacts folder. Also recreates the database."/>
+
+</project>
