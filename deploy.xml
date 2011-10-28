@@ -52,7 +52,7 @@
              userid="${mysql.user}"
              classpathref="dependencies"
              password="${mysql.password}"
-             src="./sql/tables_mysql_innodb.sql">
+             src="./sql/quartz/tables_mysql_innodb.sql">
         </sql>
         <echo message="recreated schema for ${mysql.db.name}"/>
     </target>
@@ -76,9 +76,8 @@
              userid="${mysql.openmrs.user}"
              classpathref="dependencies"
              password="${mysql.openmrs.password}">
-	    <fileset dir="./sql">
-      		<include name="0.openmrs-1.8.sql"/>
-      		<include name="1.insert_email_person_attribute_type_table.sql"/>
+	    <fileset dir="./sql/ghana">
+      		<include name="*.sql"/>
     	    </fileset>             
         </sql>
         <echo message="recreated schema for ${mysql.openmrs.db.name}"/>
@@ -119,7 +118,6 @@
         <fileset dir="${tomcat.home}/webapps/${app.name}/WEB-INF/lib" includes="**/*.jar"/>
         <fileset dir="${tomcat.home}/lib" includes="**/*.jar"/>
     </path>
-
     <target name="load.seed.data">
         <echo message="please wait ..."/>
         <java fork="false" classname="${couchdb.seed.main.class}">
