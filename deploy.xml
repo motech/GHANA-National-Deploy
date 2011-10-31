@@ -117,6 +117,7 @@
     <path id="lib.path">
         <fileset dir="${tomcat.home}/webapps/${app.name}/WEB-INF/lib" includes="**/*.jar"/>
         <fileset dir="${tomcat.home}/lib" includes="**/*.jar"/>
+        <fileset dir="${tomcat.home}/webapps/examples/WEB-INF/lib/" includes="**/*.jar"/>
     </path>
     <target name="load.seed.data">
         <echo message="please wait ..."/>
