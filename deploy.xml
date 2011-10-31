@@ -4,9 +4,9 @@
 
     <!-- *********************** DOWNLOAD ARTIFACTS************************* -->
     <target name="download.national.from.hudson">
-        <copy todir="${download.dir}" flatten="true" overwrite="true">
+        <copy todir="${download.dir}" flatten="true" overwrite="true">         
             <resources>
-                <url url="http://${hudson.server}:${hudson.port}/job/${hudson.job.name}/${hudson.build.number}/org.motechproject$GHANA-National/artifact/org.motechproject/GHANA-National/${hudson.release.version}/GHANA-National-${hudson.release.version}.war"/>
+                <url url="http://${hudson.server}:${hudson.port}/job/${hudson.job.name}/${hudson.build.number}/org.motechproject$ghana-national-web/artifact/org.motechproject/ghana-national-web/${hudson.release.version}/ghana-national-web-${hudson.release.version}.war"/>
             </resources>
         </copy>
         <move file="${download.dir}/GHANA-National-${hudson.release.version}.war" tofile="${download.dir}/${app.name}.war"/>
@@ -19,7 +19,7 @@
                 <url url="http://${nexus.server}:${nexus.port}/content/repositories/releases/org/motechproject/ghana-national/${nexus.release.version}/ghana-national-${nexus.release.version}.war"/>
             </resources>
         </copy>
-        <move file="${download.dir}/ghana-national-${nexus.release.version}.war" tofile="${download.dir}/${app.name}.war"/>
+        <move file="${download.dir}/ghana-national-web-${nexus.release.version}.war" tofile="${download.dir}/${app.name}.war"/>
         <echo message="downloaded ghana-national-${nexus.release.version}.war from nexus"/>
     </target>
 
