@@ -9,8 +9,8 @@
                 <url url="http://${hudson.server}:${hudson.port}/job/${hudson.job.name}/${hudson.build.number}/org.motechproject$ghana-national-web/artifact/org.motechproject/ghana-national-web/${hudson.release.version}/ghana-national-web-${hudson.release.version}.war"/>
             </resources>
         </copy>
-        <move file="${download.dir}/GHANA-National-${hudson.release.version}.war" tofile="${download.dir}/${app.name}.war"/>
-        <echo message="downloaded GHANA-National-${hudson.release.version}.war from hudson"/>
+        <move file="${download.dir}/ghana-national-web-${hudson.release.version}.war" tofile="${download.dir}/${app.name}.war"/>
+        <echo message="downloaded ghana-national-web-${hudson.release.version}.war from hudson"/>
     </target>
 
     <target name="download.national.from.nexus">
