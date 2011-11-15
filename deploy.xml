@@ -110,7 +110,11 @@
         <copy overwrite="true" todir="${tomcat.home}/webapps/${app.name}/WEB-INF/classes"
               file="${basedir}/properties/${env}/openmrs.properties"/>
         <copy overwrite="true" todir="${tomcat.home}/webapps/${app.name}/WEB-INF/classes"
-              file="${basedir}/properties/${env}/forms-config.json"/>            
+              file="${basedir}/properties/${env}/forms-config.json"/>  
+        <copy overwrite="true" todir="${tomcat.home}/webapps/${app.name}/WEB-INF/classes"
+              file="${basedir}/properties/${env}/email.properties"/>  
+        <copy overwrite="true" todir="${tomcat.home}/webapps/${app.name}/WEB-INF/classes"
+              file="${basedir}/properties/${env}/ghana-national.properties"/>            
     </target>
 
     <!-- ************************LOAD SEED DATA ************************* -->
