@@ -175,7 +175,6 @@
 						    start.tomcat, 						   
 					            set.properties,
 						    set.hudson.version,
-						    load.seed.data,
 						    restart.tomcat"
             description="Deploy national from hudson without recreating database and seed data"/>
 
@@ -193,7 +192,6 @@
 					  	   copy.local.war,
  						   start.tomcat, 						
 					           set.properties,
-					           load.seed.data,
 						   restart.tomcat"
             description="Deploy national from locally downloaded war(set 'local.war.file' in deploy.properties) in artifacts folder without recreating database and seed data"/>
 
