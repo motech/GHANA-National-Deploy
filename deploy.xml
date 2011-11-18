@@ -15,7 +15,7 @@
     
 	<target name="download.latest.national.from.hudson">
 		<mkdir dir="${download.dir}"/>
-        <get dest="${download.dir}" src="http://${hudson.server}:${hudson.port}/job/${hudson.job.name}/lastSuccessfulBuild/org.motechproject$ghana-national-web/artifact/org.motechproject/ghana-national-web/${hudson.release.version}/ghana-national-web-${hudson.release.version}.war"/>
+        <get dest="${download.dir}/ghana-national-web-${hudson.release.version}.war" src="http://${hudson.server}:${hudson.port}/job/${hudson.job.name}/lastSuccessfulBuild/org.motechproject$ghana-national-web/artifact/org.motechproject/ghana-national-web/${hudson.release.version}/ghana-national-web-${hudson.release.version}.war"/>
         <move file="${download.dir}/ghana-national-web-${hudson.release.version}.war" tofile="${download.dir}/${app.name}.war"/>
         <echo message="downloaded ghana-national-web-${hudson.release.version}.war from hudson"/>
     </target>
