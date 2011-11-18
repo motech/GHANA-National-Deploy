@@ -183,9 +183,6 @@
 						    set.hudson.version,
 						    restart.tomcat"
             description="Deploy national from hudson without recreating database and seed data"/>
-			
-	<target name="deploy.latest.to.qa" depends="download.latest.national.from.hudson,stop,undeploy,deploy,start" />	
-	<target name="deploy.latest.to.qa.and.reset.db" depends="drop.national.db,load.openmrs.schema,download.latest.national.from.hudson,stop,undeploy,deploy,start" />		
 
     <target name="deploy.national.from.nexus" depends="stop.tomcat,
 						   download.national.from.nexus,
