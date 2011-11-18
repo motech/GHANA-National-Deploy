@@ -90,6 +90,5 @@
             <fileset dir="${tomcat.home}/logs" includes="*"/>
         </delete>
         <echo message="removed tomcat logs"/>
-    </target>
-    
+    </target>	
 </project>

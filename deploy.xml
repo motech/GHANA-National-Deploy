@@ -4,7 +4,7 @@
 
     <!-- *********************** DOWNLOAD ARTIFACTS************************* -->
     <target name="download.national.from.hudson">
-        <copy todir="${download.dir}" flatten="true" overwrite="true">         
+        <copy todir="${download.dir}" flatten="true" overwrite="true">
             <resources>
                 <url url="http://${hudson.server}:${hudson.port}/job/${hudson.job.name}/${hudson.build.number}/org.motechproject$ghana-national-web/artifact/org.motechproject/ghana-national-web/${hudson.release.version}/ghana-national-web-${hudson.release.version}.war"/>
             </resources>
@@ -12,7 +12,13 @@
         <move file="${download.dir}/ghana-national-web-${hudson.release.version}.war" tofile="${download.dir}/${app.name}.war"/>
         <echo message="downloaded ghana-national-web-${hudson.release.version}.war from hudson"/>
     </target>
-
+    
+	<target name="download.latest.national.from.hudson">
+        <get dest="${download.dir}" src="http://${hudson.server}:${hudson.port}/job/${hudson.job.name}/lastSuccessfulBuild/org.motechproject$ghana-national-web/artifact/org.motechproject/ghana-national-web/${hudson.release.version}/ghana-national-web-${hudson.release.version}.war"/>
+        <move file="${download.dir}/ghana-national-web-${hudson.release.version}.war" tofile="${download.dir}/${app.name}.war"/>
+        <echo message="downloaded ghana-national-web-${hudson.release.version}.war from hudson"/>
+    </target>
+	
     <target name="download.national.from.nexus">
         <copy todir="${download.dir}" flatten="true" overwrite="true">
             <resources>
@@ -32,8 +38,8 @@
             <arg value="DELETE"/>
             <arg value="http://${couchdb.server}:${couchdb.port}/${couchdb.national.db}"/>
         </exec>
-    </target>	
-    
+    </target>
+
     <!-- *************************RECREATE MYSQL************************* -->
     <target name="load.quartz.schema">
         <path id="dependencies">
@@ -78,7 +84,7 @@
              password="${mysql.openmrs.password}">
 	    <fileset dir="./sql/ghana">
       		<include name="*.sql"/>
-    	    </fileset>             
+    	    </fileset>
         </sql>
         <echo message="recreated schema for ${mysql.openmrs.db.name}"/>
     </target>
@@ -110,7 +116,11 @@
         <copy overwrite="true" todir="${tomcat.home}/webapps/${app.name}/WEB-INF/classes"
               file="${basedir}/properties/${env}/openmrs.properties"/>
         <copy overwrite="true" todir="${tomcat.home}/webapps/${app.name}/WEB-INF/classes"
-              file="${basedir}/properties/${env}/forms-config.json"/>            
+              file="${basedir}/properties/${env}/forms-config.json"/>  
+        <copy overwrite="true" todir="${tomcat.home}/webapps/${app.name}/WEB-INF/classes"
+              file="${basedir}/properties/${env}/email.properties"/>  
+        <copy overwrite="true" todir="${tomcat.home}/webapps/${app.name}/WEB-INF/classes"
+              file="${basedir}/properties/${env}/ghana-national.properties"/>            
     </target>
 
     <!-- ************************LOAD SEED DATA ************************* -->
@@ -131,74 +141,75 @@
     </target>
 
     <!-- *************************DEPLOY TARGETS************************* -->
-    <target name="deploy.national.from.hudson.and.reset.db" depends="stop.tomcat, 
-             							 drop.national.db,             							
-             							 load.quartz.schema, 
+    <target name="deploy.national.from.hudson.and.reset.db" depends="stop.tomcat,
+             							 drop.national.db,
+             							 load.quartz.schema,
              							 load.openmrs.schema,
-								 download.national.from.hudson, 
-								 copy.national.to.tomcat, 
-								 start.tomcat, 	
+								 download.national.from.hudson,
+								 copy.national.to.tomcat,
+								 start.tomcat,
 								 set.properties,
 								 set.hudson.version,
 								 load.seed.data,
 								 restart.tomcat"
-            description="Deploy national by 
-                         1) fetching artifact from hudson, 
+            description="Deploy national by
+                         1) fetching artifact from hudson,
                          2) recreate national couchdb database with seed data
                          3) clearing quartz mysql jobdatastore
 			 4) set properties for war"/>
 
-    <target name="deploy.national.from.nexus.and.reset.db" depends="stop.tomcat, 
-             							drop.national.db,    
-             							load.quartz.schema, 
+    <target name="deploy.national.from.nexus.and.reset.db" depends="stop.tomcat,
+             							drop.national.db,
+             							load.quartz.schema,
              							load.openmrs.schema
-,								download.national.from.nexus, 
-								copy.national.to.tomcat, 
-								start.tomcat, 
+,								download.national.from.nexus,
+								copy.national.to.tomcat,
+								start.tomcat,
 								set.properties,
 								set.nexus.version,
 								load.seed.data,
 								restart.tomcat"
-            description="Deploy national by 
-                         1) fetching artifact from nexus, 
+            description="Deploy national by
+                         1) fetching artifact from nexus,
                          2) recreate national couchdb database with seed data
                          3) clearing quartz mysql jobdatastore
                          4) set properties for war"/>
 
-    <target name="deploy.national.from.hudson" depends="stop.tomcat, 
- 						    download.national.from.hudson, 
+    <target name="deploy.national.from.hudson" depends="stop.tomcat,
+ 						    download.national.from.hudson,
 						    copy.national.to.tomcat,
-						    start.tomcat, 						   
+						    start.tomcat,
 					            set.properties,
 						    set.hudson.version,
-						    load.seed.data,
 						    restart.tomcat"
             description="Deploy national from hudson without recreating database and seed data"/>
+			
+	<target name="deploy.latest.to.qa" depends="download.latest.national.from.hudson,stop,undeploy,deploy,start" />	
+	<target name="deploy.latest.to.qa.and.reset.db" depends="drop.national.db,load.openmrs.schema,download.latest.national.from.hudson,stop,undeploy,deploy,start" />		
 
-    <target name="deploy.national.from.nexus" depends="stop.tomcat, 
-						   download.national.from.nexus, 
-						   copy.national.to.tomcat, 
- 						   start.tomcat, 						 
+    <target name="deploy.national.from.nexus" depends="stop.tomcat,
+						   download.national.from.nexus,
+						   copy.national.to.tomcat,
+ 						   start.tomcat,
 					           set.properties,
 						   set.nexus.version,
 						   load.seed.data,
 						   restart.tomcat"
             description="Deploy national from nexus without recreating database and seed data"/>
 
-    <target name="deploy.national.from.local" depends="stop.tomcat, 
+    <target name="deploy.national.from.local" depends="stop.tomcat,
 					  	   copy.local.war,
- 						   start.tomcat, 						
+ 						   start.tomcat,
 					           set.properties,
-					           load.seed.data,
 						   restart.tomcat"
             description="Deploy national from locally downloaded war(set 'local.war.file' in deploy.properties) in artifacts folder without recreating database and seed data"/>
 
     <target name="deploy.national.from.local.and.reset.db" depends="stop.tomcat,
-                                                   drop.national.db,                                           
-                                                   load.quartz.schema, 
+                                                   drop.national.db,
+                                                   load.quartz.schema,
                                                    load.openmrs.schema,
 					  	   copy.local.war,
- 						   start.tomcat,						  
+ 						   start.tomcat,
 					           set.properties,
 						   load.seed.data,
 						   restart.tomcat"
