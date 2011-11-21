@@ -65,8 +65,24 @@
     </target>
     
     <target name="restart.tomcat" description="restart tomcat">
-		<antcall target="stop.tomcat" />
-		<antcall target="start.tomcat" />
+        <echo message="restarting tomcat..."/>
+        <exec executable="${script.interpreter}" dir="${tomcat.home}" spawn="true">
+            <arg line="${script.switch} ${tomcat.home}/bin/shutdown.${script.suffix}"/>
+        </exec>
+        <waitfor checkevery="100" checkeveryunit="millisecond" maxwait="2" maxwaitunit="minute" timeoutproperty="tomcat.timeout">
+            <not>
+                <http url="${tomcat.url}"/>
+            </not>
+        </waitfor>
+        <fail if="tomcat.timeout" message="Error shutting down tomcat..."/>
+        <exec executable="${script.interpreter}" dir="${tomcat.home}" spawn="true">
+            <arg line="${script.switch} ${tomcat.home}/bin/startup.${script.suffix}"/>
+        </exec>
+        <waitfor checkevery="100" checkeveryunit="millisecond" maxwait="2" maxwaitunit="minute" timeoutproperty="tomcat.timeout">
+            <http url="${tomcat.url}"/>
+        </waitfor>
+        <fail if="tomcat.timeout" message="Error starting up tomcat..."/>
+        <echo message="tomcat restarted"/>
     </target>
     
     <target name="clean.tomcat.logs" depends="stop.tomcat" description="Nuke all tomcat logs">
