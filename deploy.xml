@@ -159,17 +159,13 @@
                          3) clearing quartz mysql jobdatastore
 			 4) set properties for war"/>
 			 
-    <target name="deploy.latest.national.from.hudson.and.reset.db" depends="stop.tomcat,
-             							 drop.national.db,
+    <target name="deploy.latest.national.from.hudson.and.reset.db" depends="drop.national.db,
              							 load.quartz.schema,
              							 load.openmrs.schema,
 								 download.latest.national.from.hudson,
-								 copy.national.to.tomcat,
-								 start.tomcat,
-								 set.properties,
-								 set.hudson.version,
+								 undeploy,deploy,
 								 load.seed.data,
-								 restart.tomcat"
+								 reload"
             description="Deploy national by
                          1) fetching artifact from hudson,
                          2) recreate national couchdb database with seed data

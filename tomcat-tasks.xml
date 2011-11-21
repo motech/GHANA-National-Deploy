@@ -94,4 +94,39 @@
         </delete>
         <echo message="removed tomcat logs"/>
     </target>
+	<path id="tomcat.classpath">
+	<fileset dir="${basedir}/lib/tomcat/">
+	  <include name="*.jar"/>
+	  </fileset>
+	</path>
+
+  <!-- Configure the custom Ant tasks for the Manager application -->
+  <taskdef name="deploy"    classname="org.apache.catalina.ant.DeployTask" classpathref="tomcat.classpath"/>
+  <taskdef name="list"      classname="org.apache.catalina.ant.ListTask" classpathref="tomcat.classpath"/>
+  <taskdef name="reload"    classname="org.apache.catalina.ant.ReloadTask" classpathref="tomcat.classpath"/>
+  <taskdef name="findleaks" classname="org.apache.catalina.ant.FindLeaksTask" classpathref="tomcat.classpath"/>
+  <taskdef name="resources" classname="org.apache.catalina.ant.ResourcesTask" classpathref="tomcat.classpath"/>
+  <taskdef name="start"     classname="org.apache.catalina.ant.StartTask" classpathref="tomcat.classpath"/>
+  <taskdef name="stop"      classname="org.apache.catalina.ant.StopTask" classpathref="tomcat.classpath"/>
+  <taskdef name="undeploy"  classname="org.apache.catalina.ant.UndeployTask" classpathref="tomcat.classpath"/>
+
+  <target name="deploy" description="Install">
+    <deploy url="${tomcat.qa.manager.url}" username="${tomcat.user}" password="${tomcat.password}" path="/${app.name}" war="file:${download.dir}/${app.name}.war"/>
+  </target>
+
+  <target name="reload" description="Reload">
+    <reload url="${tomcat.qa.manager.url}" username="${tomcat.user}" password="${tomcat.password}" path="/${app.name}"/>
+  </target>
+
+  <target name="stop" description="Stop">
+    <stop url="${tomcat.qa.manager.url}" failonerror="false" username="${tomcat.user}" password="${tomcat.password}" path="/${app.name}"/>
+  </target>
+
+  <target name="start" description="Start">
+    <start url="${tomcat.qa.manager.url}" username="${tomcat.user}" password="${tomcat.password}" path="/${app.name}"/>
+  </target>
+  
+  <target name="undeploy" description="Remove">
+    <undeploy url="${tomcat.qa.manager.url}"  failonerror="false" username="${tomcat.user}" password="${tomcat.password}" path="/${app.name}"/>
+  </target> 	
 </project>
