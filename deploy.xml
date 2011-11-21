@@ -166,7 +166,10 @@
 								 download.latest.national.from.hudson,
 								 copy.national.to.tomcat,
 								 start.tomcat,
-								 load.seed.data"
+								 set.properties,
+								 set.hudson.version,
+								 load.seed.data,
+								 restart.tomcat"
             description="Deploy national by
                          1) fetching artifact from hudson,
                          2) recreate national couchdb database with seed data
