@@ -64,7 +64,9 @@
         <echo message="tomcat stopped"/>
     </target>
     
-    <target name="restart.tomcat" description="restart tomcat" depends="stop.tomcat,start.tomcat">
+    <target name="restart.tomcat" description="restart tomcat">
+		<antcall target="stop.tomcat" />
+		<antcall target="start.tomcat" />
     </target>
     
     <target name="clean.tomcat.logs" depends="stop.tomcat" description="Nuke all tomcat logs">
