@@ -42,7 +42,7 @@
         <echo message="Starting tomcat..."/>
         <echo message="Waiting for tomcat to start on ${tomcat.url}"/>
         <exec executable="${script.interpreter}" dir="${tomcat.home}" spawn="true">
-            <arg line="${script.switch} ${tomcat.home}/bin/startup.${script.suffix} script.background"/>
+            <arg line="${script.switch} ${tomcat.home}/bin/startup.${script.suffix}"/>
         </exec>
         <waitfor checkevery="500" checkeveryunit="millisecond" maxwait="15" maxwaitunit="minute"
                  timeoutproperty="tomcat.timeout">
@@ -55,7 +55,7 @@
         <echo message="Stopping tomcat..."/>
         <echo message="Waiting for tomcat to stop on ${tomcat.url}"/>
         <exec executable="${script.interpreter}" dir="${tomcat.home}" spawn="true">
-            <arg line="${script.switch} ${tomcat.home}/bin/shutdown.${script.suffix} ${script.background}"/>
+            <arg line="${script.switch} ${tomcat.home}/bin/shutdown.${script.suffix}"/>
         </exec>
         <waitfor checkevery="100" checkeveryunit="millisecond" maxwait="2" maxwaitunit="minute"
                  timeoutproperty="tomcat.timeout">
@@ -70,7 +70,7 @@
     <target name="restart.tomcat" description="restart tomcat">
         <echo message="restarting tomcat..."/>
         <exec executable="${script.interpreter}" dir="${tomcat.home}" spawn="true">
-            <arg line="${script.switch} ${tomcat.home}/bin/shutdown.${script.suffix} script.background"/>
+            <arg line="${script.switch} ${tomcat.home}/bin/shutdown.${script.suffix}"/>
         </exec>
         <waitfor checkevery="100" checkeveryunit="millisecond" maxwait="2" maxwaitunit="minute" timeoutproperty="tomcat.timeout">
             <not>
@@ -79,7 +79,7 @@
         </waitfor>
         <fail if="tomcat.timeout" message="Error shutting down tomcat..."/>
         <exec executable="${script.interpreter}" dir="${tomcat.home}" spawn="true">
-            <arg line="${script.switch} ${tomcat.home}/bin/startup.${script.suffix} script.background"/>
+            <arg line="${script.switch} ${tomcat.home}/bin/startup.${script.suffix} ${script.background}"/>
         </exec>
         <waitfor checkevery="100" checkeveryunit="millisecond" maxwait="2" maxwaitunit="minute" timeoutproperty="tomcat.timeout">
             <http url="${tomcat.url}"/>
