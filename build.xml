@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="ghana-national" basedir=".">
-    <property file="${basedir}/properties/${env}/deploy.properties"/>
+    <property file="${basedir}/artifacts/properties/${env}/deploy.properties"/>
     <!-- TOMCAT TASKS /START/-->
     <taskdef resource="net/sf/antcontrib/antcontrib.properties">
         <classpath>
@@ -81,13 +81,13 @@
         <echo message="dropped openmrs database ${mysql.openmrs.db.name} in ${mysql.server}"/>
         <exec executable="cmd" osfamily="windows">
             <arg value="/c"/>
-            <arg value=".\sql\ghana\load_schema.bat"/>
+            <arg value="${basedir}\artifacts\sql\ghana\load_schema.bat"/>
             <arg value="${mysql.user}"/>
             <arg value="${mysql.password}"/>
             <arg value="${mysql.openmrs.db.name}"/>
-            <arg value=".\sql\ghana\0.openmrs-1.8.sql"/>
+            <arg value="${basedir}\artifacts\sql\ghana\0.openmrs-1.8.sql"/>
         </exec>
-        <exec executable="./sql/ghana/load_schema.sh" osfamily="unix">
+        <exec executable="${basedir}/artifacts/sql/ghana/load_schema.sh" osfamily="unix">
             <arg value="${mysql.user}"/>
             <arg value="${mysql.password}"/>
             <arg value="${mysql.openmrs.db.name}"/>
@@ -98,7 +98,7 @@
              userid="${mysql.openmrs.user}"
              classpathref="dependencies"
              password="${mysql.openmrs.password}">
-            <fileset dir="./sql/ghana/deltas">
+            <fileset dir="${basedir}/artifacts/sql/ghana/deltas">
                 <include name="*.sql"/>
             </fileset>
         </sql>
@@ -123,7 +123,6 @@
 
     <target name="deploy.openmrs">
         <mkdir dir="${download.dir}"/>
-        <get username="${github.user}" password="${github.password}" dest="${download.dir}/openmrs.war" src="https://raw.github.com/motech/GHANA-National/master/build/openmrs/openmrs.war"/>
         <get username="${github.user}" password="${github.password}" dest="${download.dir}/openmrs-runtime.properties" src="https://github.com/motech/GHANA-National/raw/master/ghana-national-core/src/main/resources/openmrs-data/openmrs-runtime.properties"/>
         <get username="${github.user}" password="${github.password}" dest="${download.dir}/idgen-2.1.omod" src="https://github.com/motech/GHANA-National/raw/master/ghana-national-core/src/main/resources/openmrs-data/modules/idgen-2.1.omod"/>
         <get username="${github.user}" password="${github.password}" dest="${download.dir}/logic-0.5.0.1.omod" src="https://github.com/motech/GHANA-National/raw/master/ghana-national-core/src/main/resources/openmrs-data/modules/logic-0.5.0.1.omod"/>
@@ -143,7 +142,7 @@
             </fileset>
         </copy>
         <undeploy url="${tomcat.qa.manager.url}" failonerror="false" username="${tomcat.user}" password="${tomcat.password}" path="/openmrs"/>
-        <deploy url="${tomcat.qa.manager.url}" username="${tomcat.user}" password="${tomcat.password}" path="/openmrs" war="file:${download.dir}/openmrs.war"/>
+        <deploy url="${tomcat.qa.manager.url}" username="${tomcat.user}" password="${tomcat.password}" path="/openmrs" war="file:${basedir}/artifacts/openmrs.war"/>
     </target>
 
     <target name="deploy.latest.and.reset.db"
