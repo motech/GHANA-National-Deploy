@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="ghana-national" basedir=".">
+    <property file="${basedir}/properties/${env}/deploy.properties"/>
+    <!-- TOMCAT TASKS /START/-->
+    <taskdef resource="net/sf/antcontrib/antcontrib.properties">
+        <classpath>
+            <pathelement location="lib/ant-contrib-1.0b3.jar"/>
+        </classpath>
+    </taskdef>
+    <path id="tomcat.classpath">
+        <fileset dir="${basedir}/lib/tomcat/">
+            <include name="*.jar"/>
+        </fileset>
+    </path>
+    <taskdef name="deploy" classname="org.apache.catalina.ant.DeployTask" classpathref="tomcat.classpath"/>
+    <taskdef name="list" classname="org.apache.catalina.ant.ListTask" classpathref="tomcat.classpath"/>
+    <taskdef name="reload" classname="org.apache.catalina.ant.ReloadTask" classpathref="tomcat.classpath"/>
+    <taskdef name="findleaks" classname="org.apache.catalina.ant.FindLeaksTask" classpathref="tomcat.classpath"/>
+    <taskdef name="resources" classname="org.apache.catalina.ant.ResourcesTask" classpathref="tomcat.classpath"/>
+    <taskdef name="start" classname="org.apache.catalina.ant.StartTask" classpathref="tomcat.classpath"/>
+    <taskdef name="stop" classname="org.apache.catalina.ant.StopTask" classpathref="tomcat.classpath"/>
+    <taskdef name="undeploy" classname="org.apache.catalina.ant.UndeployTask" classpathref="tomcat.classpath"/>
+
+    <target name="deploy" description="Install">
+        <deploy url="${tomcat.qa.manager.url}" username="${tomcat.user}" password="${tomcat.password}" path="/${app.name}" war="file:${download.dir}/${app.name}.war"/>
+    </target>
+
+    <target name="reload" description="Reload">
+        <reload url="${tomcat.qa.manager.url}" username="${tomcat.user}" password="${tomcat.password}" path="/${app.name}"/>
+    </target>
+
+    <target name="stop" description="Stop">
+        <stop url="${tomcat.qa.manager.url}" failonerror="false" username="${tomcat.user}" password="${tomcat.password}" path="/${app.name}"/>
+    </target>
+
+    <target name="start" description="Start">
+        <start url="${tomcat.qa.manager.url}" username="${tomcat.user}" password="${tomcat.password}" path="/${app.name}"/>
+    </target>
+
+    <target name="undeploy" description="Remove">
+        <undeploy url="${tomcat.qa.manager.url}" failonerror="false" username="${tomcat.user}" password="${tomcat.password}" path="/${app.name}"/>
+    </target>
+    <!-- TOMCAT TASKS /END/-->
+
+    <target name="download.latest.national.from.hudson">
+        <delete dir="${download.dir}"/>
+        <mkdir dir="${download.dir}"/>
+        <get dest="${download.dir}/${app.name}.war"
+             src="http://${hudson.server}:${hudson.port}/job/${hudson.job.name}/lastSuccessfulBuild/org.motechproject$ghana-national-web/artifact/org.motechproject/ghana-national-web/${hudson.release.version}/ghana-national-web-${hudson.release.version}.war"/>
+        <echo message="downloaded ghana-national-web-${hudson.release.version}.war from hudson"/>
+    </target>
+
+    <target name="drop.national.db">
+        <exec executable="curl">
+            <arg value="-s"/>
+            <arg value="-S"/>
+            <arg value="-X"/>
+            <arg value="DELETE"/>
+            <arg value="http://${couchdb.server}:${couchdb.port}/${couchdb.national.db}"/>
+            <echo message="dropped data from couchdb in ${couchdb.server}"/>
+        </exec>
+    </target>
+
+    <target name="load.openmrs.schema">
+        <path id="dependencies">
+            <fileset file="./lib/mysql-connector-java-5.1.13.jar"/>
+        </path>
+        <sql driver="${mysql.driver}"
+             url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.openmrs.db.name}?autoReconnect=true"
+             userid="${mysql.user}"
+             classpathref="dependencies"
+             password="${mysql.password}">
+            drop database ${mysql.openmrs.db.name};
+            create database ${mysql.openmrs.db.name} default charset utf8;
+            grant all on ${mysql.openmrs.db.name}.* to '${mysql.openmrs.user}'@'localhost' identified by
+            '${mysql.openmrs.password}';
+            grant all on ${mysql.openmrs.db.name}.* to '${mysql.openmrs.user}'@'%' identified by
+            '${mysql.openmrs.password}';
+            flush privileges;
+        </sql>
+        <echo message="dropped openmrs database ${mysql.openmrs.db.name} in ${mysql.server}"/>
+        <exec executable="cmd" osfamily="windows">
+            <arg value="/c"/>
+            <arg value=".\sql\ghana\load_schema.bat"/>
+            <arg value="${mysql.user}"/>
+            <arg value="${mysql.password}"/>
+            <arg value="${mysql.openmrs.db.name}"/>
+            <arg value=".\sql\ghana\0.openmrs-1.8.sql"/>
+        </exec>
+        <exec executable="./sql/ghana/load_schema.sh" osfamily="unix">
+            <arg value="${mysql.user}"/>
+            <arg value="${mysql.password}"/>
+            <arg value="${mysql.openmrs.db.name}"/>
+            <arg value="./sql/ghana/0.openmrs-1.8.sql"/>
+        </exec>
+        <sql driver="${mysql.driver}"
+             url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.openmrs.db.name}?autoReconnect=true"
+             userid="${mysql.openmrs.user}"
+             classpathref="dependencies"
+             password="${mysql.openmrs.password}">
+            <fileset dir="./sql/ghana/deltas">
+                <include name="*.sql"/>
+            </fileset>
+        </sql>
+        <echo message="recreated schema for ${mysql.openmrs.db.name}"/>
+    </target>
+
+    <target name="load.seed.data">
+        <path id="lib.path">
+            <fileset dir="${tomcat.home}/webapps/${app.name}/WEB-INF/lib" includes="**/*.jar"/>
+            <fileset dir="${tomcat.home}/lib" includes="**/*.jar"/>
+            <fileset dir="${tomcat.home}/webapps/examples/WEB-INF/lib/" includes="**/*.jar"/>
+        </path>
+        <echo message="please wait ..."/>
+        <java fork="false" classname="${couchdb.seed.main.class}">
+            <classpath>
+                <path location="${tomcat.home}/webapps/${app.name}/WEB-INF/classes"/>
+                <path refid="lib.path"/>
+            </classpath>
+        </java>
+        <echo message="seed data loaded into ${couchdb.national.db} database"/>
+    </target>
+
+    <target name="deploy.openmrs">
+        <mkdir dir="${download.dir}"/>
+        <get username="${github.user}" password="${github.password}" dest="${download.dir}/openmrs.war" src="https://raw.github.com/motech/GHANA-National/master/build/openmrs/openmrs.war"/>
+        <get username="${github.user}" password="${github.password}" dest="${download.dir}/openmrs-runtime.properties" src="https://github.com/motech/GHANA-National/raw/master/ghana-national-core/src/main/resources/openmrs-data/openmrs-runtime.properties"/>
+        <get username="${github.user}" password="${github.password}" dest="${download.dir}/idgen-2.1.omod" src="https://github.com/motech/GHANA-National/raw/master/ghana-national-core/src/main/resources/openmrs-data/modules/idgen-2.1.omod"/>
+        <get username="${github.user}" password="${github.password}" dest="${download.dir}/logic-0.5.0.1.omod" src="https://github.com/motech/GHANA-National/raw/master/ghana-national-core/src/main/resources/openmrs-data/modules/logic-0.5.0.1.omod"/>
+        <get dest="${download.dir}/idgen-omod.omod" src="http://nexus.motechproject.org/content/repositories/snapshots/org/motechproject/idgen-omod/1.0-SNAPSHOT/idgen-omod-1.0-SNAPSHOT.jar"/>
+
+        <condition property="openmrs.directory" value="${user.home}/.OpenMRS" else="${user.home}/AppData/Roaming/OpenMRS">
+            <os family="unix"/>
+        </condition>
+
+        <delete dir="${openmrs.directory}"/>
+        <mkdir dir="${openmrs.directory}"/>
+        <mkdir dir="${openmrs.directory}/modules"/>
+        <copy file="${download.dir}/openmrs-runtime.properties" tofile="${openmrs.directory}/openmrs-runtime.properties"/>
+        <copy todir="${openmrs.directory}/modules">
+            <fileset dir="${download.dir}">
+                <include name="**/*.omod"/>
+            </fileset>
+        </copy>
+        <undeploy url="${tomcat.qa.manager.url}" failonerror="false" username="${tomcat.user}" password="${tomcat.password}" path="/openmrs"/>
+        <deploy url="${tomcat.qa.manager.url}" username="${tomcat.user}" password="${tomcat.password}" path="/openmrs" war="file:${download.dir}/openmrs.war"/>
+    </target>
+
+    <target name="deploy.latest.and.reset.db"
+            depends="download.latest.national.from.hudson,drop.national.db,load.openmrs.schema,undeploy,deploy,load.seed.data,reload"/>
+
+    <target name="deploy.latest" depends="download.latest.national.from.hudson,undeploy,deploy,reload"/>
+</project>
