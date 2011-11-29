@@ -12,6 +12,11 @@
             <include name="*.jar"/>
         </fileset>
     </path>
+
+    <condition property="openmrs.directory" value="${user.home}/.OpenMRS" else="${user.home}/AppData/Roaming/OpenMRS">
+        <os family="unix"/>
+    </condition>
+
     <taskdef name="deploy" classname="org.apache.catalina.ant.DeployTask" classpathref="tomcat.classpath"/>
     <taskdef name="list" classname="org.apache.catalina.ant.ListTask" classpathref="tomcat.classpath"/>
     <taskdef name="reload" classname="org.apache.catalina.ant.ReloadTask" classpathref="tomcat.classpath"/>
@@ -21,24 +26,28 @@
     <taskdef name="stop" classname="org.apache.catalina.ant.StopTask" classpathref="tomcat.classpath"/>
     <taskdef name="undeploy" classname="org.apache.catalina.ant.UndeployTask" classpathref="tomcat.classpath"/>
 
-    <target name="deploy" description="Install">
-        <deploy url="${tomcat.qa.manager.url}" username="${tomcat.user}" password="${tomcat.password}" path="/${app.name}" war="file:${download.dir}/${app.name}.war"/>
+    <target name="deploy.national" description="Install">
+        <deploy url="${tomcat.manager.url}" username="${tomcat.user}" password="${tomcat.password}" path="/${app.name}" war="file:${download.dir}/${app.name}.war"/>
     </target>
 
-    <target name="reload" description="Reload">
-        <reload url="${tomcat.qa.manager.url}" username="${tomcat.user}" password="${tomcat.password}" path="/${app.name}"/>
+    <target name="deploy.openmrs" description="Install">
+        <deploy url="${tomcat.manager.url}" username="${tomcat.user}" password="${tomcat.password}" path="/openmrs" war="file:${basedir}/artifacts/war/openmrs.war"/>
     </target>
 
-    <target name="stop" description="Stop">
-        <stop url="${tomcat.qa.manager.url}" failonerror="false" username="${tomcat.user}" password="${tomcat.password}" path="/${app.name}"/>
+    <target name="reload.national" description="Reload">
+        <reload url="${tomcat.manager.url}" username="${tomcat.user}" password="${tomcat.password}" path="/${app.name}"/>
     </target>
 
-    <target name="start" description="Start">
-        <start url="${tomcat.qa.manager.url}" username="${tomcat.user}" password="${tomcat.password}" path="/${app.name}"/>
+    <target name="reload.openmrs" description="Reload">
+        <reload url="${tomcat.manager.url}" username="${tomcat.user}" password="${tomcat.password}" path="/openmrs"/>
     </target>
 
-    <target name="undeploy" description="Remove">
-        <undeploy url="${tomcat.qa.manager.url}" failonerror="false" username="${tomcat.user}" password="${tomcat.password}" path="/${app.name}"/>
+    <target name="undeploy.national" description="Remove">
+        <undeploy url="${tomcat.manager.url}" failonerror="false" username="${tomcat.user}" password="${tomcat.password}" path="/${app.name}"/>
+    </target>
+
+    <target name="undeploy.openmrs" description="Remove">
+        <undeploy url="${tomcat.manager.url}" failonerror="false" username="${tomcat.user}" password="${tomcat.password}" path="/openmrs"/>
     </target>
     <!-- TOMCAT TASKS /END/-->
 
@@ -57,8 +66,8 @@
             <arg value="-X"/>
             <arg value="DELETE"/>
             <arg value="http://${couchdb.server}:${couchdb.port}/${couchdb.national.db}"/>
-            <echo message="dropped data from couchdb in ${couchdb.server}"/>
         </exec>
+        <echo message="dropped data from couchdb in ${couchdb.server}"/>
     </target>
 
     <target name="load.openmrs.schema">
@@ -91,8 +100,12 @@
             <arg value="${mysql.user}"/>
             <arg value="${mysql.password}"/>
             <arg value="${mysql.openmrs.db.name}"/>
-            <arg value="./sql/ghana/0.openmrs-1.8.sql"/>
+            <arg value="${basedir}/artifacts/sql/ghana/0.openmrs-1.8.sql"/>
         </exec>
+        <echo message="recreated schema for ${mysql.openmrs.db.name}"/>
+    </target>
+
+    <target name="openmrs.deltas">
         <sql driver="${mysql.driver}"
              url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.openmrs.db.name}?autoReconnect=true"
              userid="${mysql.openmrs.user}"
@@ -102,7 +115,6 @@
                 <include name="*.sql"/>
             </fileset>
         </sql>
-        <echo message="recreated schema for ${mysql.openmrs.db.name}"/>
     </target>
 
     <target name="load.seed.data">
@@ -121,16 +133,16 @@
         <echo message="seed data loaded into ${couchdb.national.db} database"/>
     </target>
 
-    <target name="deploy.openmrs">
+    <target name="deploy.idgen.omod">
+        <get dest="${download.dir}/idgen-omod.omod" src="http://nexus.motechproject.org/content/repositories/snapshots/org/motechproject/idgen-omod/1.0-SNAPSHOT/idgen-omod-1.0-SNAPSHOT.jar"/>
+        <copy file="${download.dir}/idgen-omod.omod" tofile="${openmrs.directory}/modules/idgen-omod.omod"/>
+    </target>
+
+    <target name="download.openmrs">
         <mkdir dir="${download.dir}"/>
         <get username="${github.user}" password="${github.password}" dest="${download.dir}/openmrs-runtime.properties" src="https://github.com/motech/GHANA-National/raw/master/ghana-national-core/src/main/resources/openmrs-data/openmrs-runtime.properties"/>
         <get username="${github.user}" password="${github.password}" dest="${download.dir}/idgen-2.1.omod" src="https://github.com/motech/GHANA-National/raw/master/ghana-national-core/src/main/resources/openmrs-data/modules/idgen-2.1.omod"/>
         <get username="${github.user}" password="${github.password}" dest="${download.dir}/logic-0.5.0.1.omod" src="https://github.com/motech/GHANA-National/raw/master/ghana-national-core/src/main/resources/openmrs-data/modules/logic-0.5.0.1.omod"/>
-        <get dest="${download.dir}/idgen-omod.omod" src="http://nexus.motechproject.org/content/repositories/snapshots/org/motechproject/idgen-omod/1.0-SNAPSHOT/idgen-omod-1.0-SNAPSHOT.jar"/>
-
-        <condition property="openmrs.directory" value="${user.home}/.OpenMRS" else="${user.home}/AppData/Roaming/OpenMRS">
-            <os family="unix"/>
-        </condition>
 
         <delete dir="${openmrs.directory}"/>
         <mkdir dir="${openmrs.directory}"/>
@@ -141,12 +153,7 @@
                 <include name="**/*.omod"/>
             </fileset>
         </copy>
-        <undeploy url="${tomcat.qa.manager.url}" failonerror="false" username="${tomcat.user}" password="${tomcat.password}" path="/openmrs"/>
-        <deploy url="${tomcat.qa.manager.url}" username="${tomcat.user}" password="${tomcat.password}" path="/openmrs" war="file:${basedir}/artifacts/openmrs.war"/>
     </target>
-
-    <target name="deploy.latest.and.reset.db"
-            depends="download.latest.national.from.hudson,drop.national.db,load.openmrs.schema,undeploy,deploy,load.seed.data,reload"/>
-
-    <target name="deploy.latest" depends="download.latest.national.from.hudson,undeploy,deploy,reload"/>
+    <target name="init" depends="drop.national.db,load.openmrs.schema,openmrs.deltas,download.openmrs,deploy.idgen.omod,undeploy.openmrs,deploy.openmrs,download.latest.national.from.hudson,undeploy.national,deploy.national,load.seed.data,reload.national"/>
+    <target name="deploy.latest" depends="deploy.idgen.omod,download.latest.national.from.hudson,undeploy.national,deploy.national,reload.national"/>
 </project>
