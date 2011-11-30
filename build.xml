@@ -156,5 +156,5 @@
         </copy>
     </target>
     <target name="init" depends="drop.national.db,load.openmrs.schema,openmrs.deltas,download.openmrs,deploy.idgen.omod,undeploy.openmrs,deploy.openmrs,download.latest.national.from.hudson,undeploy.national,deploy.national,load.seed.data,reload.national"/>
-    <target name="deploy.latest" depends="deploy.idgen.omod,download.latest.national.from.hudson,undeploy.national,deploy.national,reload.national"/>
+    <target name="deploy.latest" depends="download.latest.national.from.hudson,undeploy.national,deploy.national,reload.national"/>
 </project>
