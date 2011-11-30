@@ -134,6 +134,7 @@
     </target>
 
     <target name="deploy.idgen.omod">
+	    <mkdir dir="${download.dir}"/>
         <get dest="${download.dir}/idgen-omod.omod" src="http://nexus.motechproject.org/content/repositories/snapshots/org/motechproject/idgen-omod/1.0-SNAPSHOT/idgen-omod-1.0-SNAPSHOT.jar"/>
         <copy file="${download.dir}/idgen-omod.omod" tofile="${openmrs.directory}/modules/idgen-omod.omod"/>
     </target>
