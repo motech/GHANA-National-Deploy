@@ -143,9 +143,9 @@
 
     <target name="download.openmrs">
         <mkdir dir="${download.dir}"/>
-        <get username="${github.user}" password="${github.password}" dest="${download.dir}/openmrs-runtime.properties" src="https://github.com/motech/GHANA-National/raw/master/ghana-national-core/src/main/resources/openmrs-data/openmrs-runtime.properties"/>
-        <get username="${github.user}" password="${github.password}" dest="${download.dir}/idgen-2.1.omod" src="https://github.com/motech/GHANA-National/raw/master/ghana-national-core/src/main/resources/openmrs-data/modules/idgen-2.1.omod"/>
-        <get username="${github.user}" password="${github.password}" dest="${download.dir}/logic-0.5.0.1.omod" src="https://github.com/motech/GHANA-National/raw/master/ghana-national-core/src/main/resources/openmrs-data/modules/logic-0.5.0.1.omod"/>
+        <get username="${github.user}" password="${github.password}" dest="${download.dir}/openmrs-runtime.properties" src="https://github.com/motech/GHANA-National/raw/master/ghana-national-common/src/main/resources/openmrs-data/openmrs-runtime.properties"/>
+        <get username="${github.user}" password="${github.password}" dest="${download.dir}/idgen-2.1.omod" src="https://github.com/motech/GHANA-National/raw/master/ghana-national-common/src/main/resources/openmrs-data/modules/idgen-2.1.omod"/>
+        <get username="${github.user}" password="${github.password}" dest="${download.dir}/logic-0.5.0.1.omod" src="https://github.com/motech/GHANA-National/raw/master/ghana-national-common/src/main/resources/openmrs-data/modules/logic-0.5.0.1.omod"/>
 
         <delete dir="${openmrs.directory}"/>
         <mkdir dir="${openmrs.directory}"/>
