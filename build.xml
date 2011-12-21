@@ -55,7 +55,7 @@
         <delete dir="${download.dir}"/>
         <mkdir dir="${download.dir}"/>
         <get dest="${download.dir}/${app.name}.war"
-             src="http://${hudson.server}:${hudson.port}/job/${hudson.job.name}/lastSuccessfulBuild/org.motechproject$ghana-national-web/artifact/org.motechproject/ghana-national-web/${hudson.release.version}/ghana-national-web-${hudson.release.version}.war"/>
+             src="${hudson.url}"/>
         <echo message="downloaded ghana-national-web-${hudson.release.version}.war from hudson"/>
     </target>
 
