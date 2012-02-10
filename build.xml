@@ -35,7 +35,7 @@
     </target>
 
     <target name="deploy.deliverytools" description="Install">
-        <deploy url="${tomcat.manager.url}" username="${tomcat.user}" password="${tomcat.password}" path="/deliverytools" war="file:${basedir}/artifacts/war/deliverytools.war"/>
+        <deploy url="${tomcat.manager.url}" username="${tomcat.user}" password="${tomcat.password}" path="/deliverytools" war="file:${download.dir}/deliverytools.war"/>
     </target>
 
     <target name="reload.national" description="Reload">
