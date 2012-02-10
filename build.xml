@@ -34,12 +34,20 @@
         <deploy url="${tomcat.manager.url}" username="${tomcat.user}" password="${tomcat.password}" path="/openmrs" war="file:${basedir}/artifacts/war/openmrs.war"/>
     </target>
 
+    <target name="deploy.deliverytools" description="Install">
+        <deploy url="${tomcat.manager.url}" username="${tomcat.user}" password="${tomcat.password}" path="/deliverytools" war="file:${basedir}/artifacts/war/deliverytools.war"/>
+    </target>
+
     <target name="reload.national" description="Reload">
         <reload url="${tomcat.manager.url}" username="${tomcat.user}" password="${tomcat.password}" path="/${app.name}"/>
     </target>
 
     <target name="reload.openmrs" description="Reload">
         <reload url="${tomcat.manager.url}" username="${tomcat.user}" password="${tomcat.password}" path="/openmrs"/>
+    </target>
+
+    <target name="reload.deliverytools" description="Reload">
+        <reload url="${tomcat.manager.url}" username="${tomcat.user}" password="${tomcat.password}" path="/deliverytools"/>
     </target>
 
     <target name="undeploy.national" description="Remove">
@@ -49,14 +57,27 @@
     <target name="undeploy.openmrs" description="Remove">
         <undeploy url="${tomcat.manager.url}" failonerror="false" username="${tomcat.user}" password="${tomcat.password}" path="/openmrs"/>
     </target>
+
+    <target name="undeploy.deliverytools" description="Remove">
+        <undeploy url="${tomcat.manager.url}" failonerror="false" username="${tomcat.user}" password="${tomcat.password}" path="/deliverytools"/>
+    </target>
+
     <!-- TOMCAT TASKS /END/-->
 
     <target name="download.latest.national.from.hudson">
         <delete dir="${download.dir}"/>
         <mkdir dir="${download.dir}"/>
         <get dest="${download.dir}/${app.name}.war"
-             src="${hudson.url}"/>
-        <echo message="downloaded ghana-national-web-${hudson.release.version}.war from hudson"/>
+             src="${hudson.ghana.national.url}"/>
+        <echo message="downloaded ghana-national-web-${hudson.ghana.national.release.version}.war from hudson"/>
+    </target>
+
+    <target name="download.latest.deliverytools.from.hudson">
+        <delete dir="${download.dir}"/>
+        <mkdir dir="${download.dir}"/>
+        <get dest="${download.dir}/deliverytools.war"
+             src="${hudson.delivery.tools.url}"/>
+        <echo message="downloaded ghana-deliverytools-web-${hudson.delivery.tools.release.version}.war from hudson"/>
     </target>
 
     <target name="drop.national.db">
@@ -162,6 +183,6 @@
             </fileset>
         </copy>
     </target>
-    <target name="init" depends="drop.national.db,load.openmrs.schema,openmrs.deltas,download.openmrs,deploy.idgen.omod,undeploy.openmrs,deploy.openmrs,download.latest.national.from.hudson,undeploy.national,deploy.national,load.seed.data,reload.national"/>
+    <target name="init" depends="drop.national.db,load.openmrs.schema,openmrs.deltas,download.openmrs,deploy.idgen.omod,undeploy.openmrs,deploy.openmrs,download.latest.national.from.hudson,undeploy.national,deploy.national,download.latest.deliverytools.from.hudson,undeploy.deliverytools,deploy.deliverytools,load.seed.data,reload.national"/>
     <target name="deploy.latest" depends="download.latest.national.from.hudson,undeploy.national,deploy.national,reload.national"/>
 </project>
