@@ -126,6 +126,19 @@
         <echo message="recreated schema for ${mysql.openmrs.db.name}"/>
     </target>
 
+    <target name="openmrs.quartz">
+        <sql driver="${mysql.driver}"
+             url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.quartz.db.name}?autoReconnect=true"
+             userid="${mysql.user}"
+             classpathref="dependencies"
+             password="${mysql.password}">
+            <fileset dir="${basedir}/artifacts/sql/ghana">
+                <include name="create_db_schema_quartz_v1.8.sql"/>
+            </fileset>
+        </sql>
+	<echo message="creation of ${mysql.quartz.db.name} db successful."/>
+    </target>
+
     <target name="openmrs.deltas">
         <sql driver="${mysql.driver}"
              url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.openmrs.db.name}?autoReconnect=true"
@@ -183,6 +196,6 @@
             </fileset>
         </copy>
     </target>
-    <target name="init" depends="drop.national.db,load.openmrs.schema,openmrs.deltas,download.openmrs,deploy.idgen.omod,undeploy.openmrs,deploy.openmrs,download.latest.national.from.hudson,undeploy.national,deploy.national,download.latest.deliverytools.from.hudson,undeploy.deliverytools,deploy.deliverytools,load.seed.data,reload.national"/>
+    <target name="init" depends="drop.national.db,load.openmrs.schema,openmrs.quartz,openmrs.deltas,download.openmrs,deploy.idgen.omod,undeploy.openmrs,deploy.openmrs,download.latest.national.from.hudson,undeploy.national,deploy.national,download.latest.deliverytools.from.hudson,undeploy.deliverytools,deploy.deliverytools,load.seed.data,reload.national"/>
     <target name="deploy.latest" depends="download.latest.national.from.hudson,undeploy.national,deploy.national,load.seed.data,reload.national"/>
 </project>
