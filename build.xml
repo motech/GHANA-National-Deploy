@@ -294,7 +294,6 @@
         <java fork="false" classname="${migration.main.class}">
             <classpath>
                 <path location="${tomcat.home}/webapps/${app.name}/WEB-INF/classes"/>
-                <path location="${download.dir}"/>
                 <path refid="lib.path"/>
                 <path location="${download.dir}/ghana-national-tools-1.0-SNAPSHOT"/>
             </classpath>
