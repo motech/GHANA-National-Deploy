@@ -126,6 +126,41 @@
         <echo message="recreated schema for ${mysql.openmrs.db.name}"/>
     </target>
 
+    <target name="load.migrated.openmrs.schema">
+        <path id="dependencies">
+            <fileset file="./lib/mysql-connector-java-5.1.13.jar"/>
+        </path>
+        <sql driver="${mysql.driver}"
+             url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.openmrs.db.name}?autoReconnect=true"
+             userid="${mysql.user}"
+             classpathref="dependencies"
+             password="${mysql.password}">
+            drop database ${mysql.openmrs.db.name};
+            create database ${mysql.openmrs.db.name} default charset utf8;
+            grant all on ${mysql.openmrs.db.name}.* to '${mysql.openmrs.user}'@'localhost' identified by
+            '${mysql.openmrs.password}';
+            grant all on ${mysql.openmrs.db.name}.* to '${mysql.openmrs.user}'@'%' identified by
+            '${mysql.openmrs.password}';
+            flush privileges;
+        </sql>
+        <echo message="dropped openmrs database ${mysql.openmrs.db.name} in ${mysql.server}"/>
+        <exec executable="cmd" osfamily="windows">
+            <arg value="/c"/>
+            <arg value="${basedir}\artifacts\sql\ghana\load_schema.bat"/>
+            <arg value="${mysql.user}"/>
+            <arg value="${mysql.password}"/>
+            <arg value="${mysql.openmrs.db.name}"/>
+            <arg value="${basedir}\artifacts\sql\ghana\0.openmrs.1.8.migrated.sql"/>
+        </exec>
+        <exec executable="${basedir}/artifacts/sql/ghana/load_schema.sh" osfamily="unix">
+            <arg value="${mysql.user}"/>
+            <arg value="${mysql.password}"/>
+            <arg value="${mysql.openmrs.db.name}"/>
+            <arg value="${basedir}/artifacts/sql/ghana/0.openmrs.1.8.migrated.sql"/>
+        </exec>
+        <echo message="recreated schema for ${mysql.openmrs.db.name}"/>
+    </target>
+
     <target name="openmrs.quartz">
         <sql driver="${mysql.driver}"
              url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.quartz.db.name}?autoReconnect=true"
@@ -213,6 +248,7 @@
             </fileset>
         </copy>
     </target>
+    <target name="init.migrated" depends="drop.national.db,load.migrated.openmrs.schema,download.openmrs,deploy.idgen.omod,undeploy.openmrs,deploy.openmrs,download.latest.national.from.hudson,undeploy.national,deploy.national,download.latest.deliverytools.from.hudson,undeploy.deliverytools,deploy.deliverytools,load.seed.data,reload.national"/>
     <target name="init" depends="drop.national.db,load.openmrs.schema,openmrs.quartz,openmrs.deltas,download.openmrs,deploy.idgen.omod,undeploy.openmrs,deploy.openmrs,download.latest.national.from.hudson,undeploy.national,deploy.national,download.latest.deliverytools.from.hudson,undeploy.deliverytools,deploy.deliverytools,load.seed.data,reload.national"/>
-    <target name="deploy.latest" depends="download.latest.national.from.hudson,undeploy.national,deploy.national,load.seed.data,reload.national"/>
+    <target name="deploy.latest" depends="download.latest.national.from.hudson,undeploy.national,openmrs.quartz,deploy.national,load.seed.data,reload.national"/>
 </project>
