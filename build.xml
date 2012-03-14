@@ -188,7 +188,8 @@
 
     <target name="load.seed.data">
 		<delete dir="${download.dir}"/>
-        <get dest="${download.dir}/ghana-national-tools-1.0-SNAPSHOT.jar"
+		<mkdir dir="${download.dir}"/>        
+		<get dest="${download.dir}/ghana-national-tools-1.0-SNAPSHOT.jar"
              src="http://nexus.motechproject.org/content/repositories/snapshots/org/motechproject/ghana-national-tools/1.0-SNAPSHOT/ghana-national-tools-1.0-SNAPSHOT.jar"/>
         <unzip dest="${download.dir}">
             <fileset dir="${download.dir}">
@@ -212,6 +213,7 @@
 
     <target name="migrate.schedule.data">
 		<delete dir="${download.dir}"/>
+		<mkdir dir="${download.dir}"/>
         <get dest="${download.dir}/ghana-national-tools-1.0-SNAPSHOT.jar"
              src="http://nexus.motechproject.org/content/repositories/snapshots/org/motechproject/ghana-national-tools/1.0-SNAPSHOT/ghana-national-tools-1.0-SNAPSHOT.jar"/>
         <unzip dest="${download.dir}">
