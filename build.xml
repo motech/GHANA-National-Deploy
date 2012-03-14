@@ -209,7 +209,7 @@
         <echo message="seed data loaded into ${couchdb.national.db} database"/>
     </target>
 
-    <target name="load.seed.data">
+    <target name="migrate.schedule.data">
         <path id="lib.path">
             <fileset dir="${tomcat.home}/webapps/${app.name}/WEB-INF/lib" includes="**/*.jar"/>
             <fileset dir="${tomcat.home}/lib" includes="**/*.jar"/>
@@ -222,7 +222,7 @@
                 <path refid="lib.path"/>
             </classpath>
         </java>
-        <echo message="seed data loaded into ${couchdb.national.db} database"/>
+        <echo message="Schedule data loaded into ${couchdb.national.db} database"/>
     </target>
 
 
