@@ -187,6 +187,7 @@
     </target>
 
     <target name="load.seed.data">
+		<delete dir="${download.dir}"/>
         <get dest="${download.dir}/ghana-national-tools-1.0-SNAPSHOT.jar"
              src="http://nexus.motechproject.org/content/repositories/snapshots/org/motechproject/ghana-national-tools/1.0-SNAPSHOT/ghana-national-tools-1.0-SNAPSHOT.jar"/>
         <unzip dest="${download.dir}">
@@ -210,6 +211,14 @@
     </target>
 
     <target name="migrate.schedule.data">
+		<delete dir="${download.dir}"/>
+        <get dest="${download.dir}/ghana-national-tools-1.0-SNAPSHOT.jar"
+             src="http://nexus.motechproject.org/content/repositories/snapshots/org/motechproject/ghana-national-tools/1.0-SNAPSHOT/ghana-national-tools-1.0-SNAPSHOT.jar"/>
+        <unzip dest="${download.dir}">
+            <fileset dir="${download.dir}">
+                <include name="ghana-national-tools-1.0-SNAPSHOT.jar" />
+            </fileset>
+        </unzip>
         <path id="lib.path">
             <fileset dir="${tomcat.home}/webapps/${app.name}/WEB-INF/lib" includes="**/*.jar"/>
             <fileset dir="${tomcat.home}/lib" includes="**/*.jar"/>
