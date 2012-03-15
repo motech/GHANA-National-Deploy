@@ -212,11 +212,13 @@
     </target>
 
     <target name="migrate.schedule.data">
-		<delete dir="${download.dir}"/>
-		<mkdir dir="${download.dir}"/>
+        <delete dir="${download.dir}"/>
+        <mkdir dir="${download.dir}"/>
+        <delete dir="${download.dir}/ghana-national-tools-1.0-SNAPSHOT"/>
+        <mkdir dir= "${download.dir}/ghana-national-tools-1.0-SNAPSHOT"/>
         <get dest="${download.dir}/ghana-national-tools-1.0-SNAPSHOT.jar"
              src="http://nexus.motechproject.org/content/repositories/snapshots/org/motechproject/ghana-national-tools/1.0-SNAPSHOT/ghana-national-tools-1.0-SNAPSHOT.jar"/>
-        <unzip dest="${download.dir}">
+        <unzip dest="${download.dir}/ghana-national-tools-1.0-SNAPSHOT">
             <fileset dir="${download.dir}">
                 <include name="ghana-national-tools-1.0-SNAPSHOT.jar" />
             </fileset>
@@ -228,6 +230,7 @@
         <echo message="please wait ..."/>
         <java fork="false" classname="${migration.main.class}">
             <classpath>
+                <path location="${download.dir}/ghana-national-tools-1.0-SNAPSHOT"/>
                 <path location="${tomcat.home}/webapps/${app.name}/WEB-INF/classes"/>
                 <path location="${download.dir}"/>
                 <path refid="lib.path"/>
