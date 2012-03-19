@@ -233,5 +233,5 @@
     </target>
     <target name="init.migrated" depends="drop.national.db,load.migrated.openmrs.schema,download.openmrs,deploy.idgen.omod,undeploy.openmrs,deploy.openmrs,download.latest.national.from.hudson,undeploy.national,deploy.national,download.latest.deliverytools.from.hudson,undeploy.deliverytools,deploy.deliverytools,load.seed.data,reload.national"/>
     <target name="init" depends="drop.national.db,load.openmrs.schema,openmrs.quartz,openmrs.deltas,download.openmrs,deploy.idgen.omod,undeploy.openmrs,deploy.openmrs,download.latest.national.from.hudson,undeploy.national,deploy.national,download.latest.deliverytools.from.hudson,undeploy.deliverytools,deploy.deliverytools,load.seed.data,reload.national"/>
-    <target name="deploy.latest" depends="download.latest.national.from.hudson,undeploy.national,deploy.national,load.seed.data,reload.national"/>
+    <target name="deploy.latest" depends="download.latest.national.from.hudson,undeploy.national,openmrs.quartz,deploy.national,load.seed.data,reload.national"/>
 </project>
