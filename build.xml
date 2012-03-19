@@ -162,7 +162,10 @@
     </target>
 
     <target name="openmrs.quartz">
-        <sql driver="${mysql.driver}"
+        <path id="dependencies">
+            <fileset file="./lib/mysql-connector-java-5.1.13.jar"/>
+        </path>        
+		<sql driver="${mysql.driver}"
              url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.quartz.db.name}?autoReconnect=true"
              userid="${mysql.user}"
              classpathref="dependencies"
@@ -175,6 +178,9 @@
     </target>
 
     <target name="openmrs.deltas">
+        <path id="dependencies">
+            <fileset file="./lib/mysql-connector-java-5.1.13.jar"/>
+        </path>
         <sql driver="${mysql.driver}"
              url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.openmrs.db.name}?autoReconnect=true"
              userid="${mysql.user}"
@@ -230,10 +236,10 @@
         <echo message="please wait ..."/>
         <java fork="false" classname="${migration.main.class}">
             <classpath>
-                <path location="${download.dir}/ghana-national-tools-1.0-SNAPSHOT"/>
                 <path location="${tomcat.home}/webapps/${app.name}/WEB-INF/classes"/>
                 <path location="${download.dir}"/>
                 <path refid="lib.path"/>
+                <path location="${download.dir}/ghana-national-tools-1.0-SNAPSHOT"/>
             </classpath>
         </java>
         <echo message="Schedule data loaded into ${couchdb.national.db} database"/>
