@@ -13,7 +13,7 @@
         </fileset>
     </path>
 
-    <condition property="openmrs.directory" value="${user.home}/.OpenMRS" else="${user.home}/AppData/Roaming/OpenMRS">
+    <condition property="openmrs.directory" value="${home.dir}/.OpenMRS" else="${user.home}/AppData/Roaming/OpenMRS">
         <os family="unix"/>
     </condition>
 
