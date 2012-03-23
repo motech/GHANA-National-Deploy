@@ -254,6 +254,13 @@
     </target>
 
     <target name="deploy.reports">
+        <delete dir="${openmrs.directory}/modules/reports"/>
+        <mkdir dir="${openmrs.directory}/modules/reports"/>
+        <mkdir dir="${openmrs.directory}/modules/reports/output"/>
+        <mkdir dir="${openmrs.directory}/modules/reports/output/images"/>
+        <mkdir dir="${openmrs.directory}/modules/reports/logs"/>
+        <mkdir dir="${openmrs.directory}/modules/reports/datasets"/>
+
         <get username="${github.user}" password="${github.password}" dest="${openmrs.directory}/modules/reports/1.rptdesign"
              src="https://github.com/motech/Ghana-Reports/raw/master/child-health-return.rptdesign"/>
         <get username="${github.user}" password="${github.password}" dest="${openmrs.directory}/modules/reports/2.rptdesign"
