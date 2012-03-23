@@ -104,11 +104,11 @@
             <fileset file="./lib/mysql-connector-java-5.1.13.jar"/>
         </path>
         <sql driver="${mysql.driver}"
-             url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.openmrs.db.name}?autoReconnect=true"
+             url="jdbc:mysql://${mysql.server}:${mysql.port}?autoReconnect=true"
              userid="${mysql.user}"
              classpathref="dependencies"
              password="${mysql.password}">
-            drop database ${mysql.openmrs.db.name};
+            drop database if exists ${mysql.openmrs.db.name};
             create database ${mysql.openmrs.db.name} default charset utf8;
             grant all on ${mysql.openmrs.db.name}.* to '${mysql.openmrs.user}'@'localhost' identified by
             '${mysql.openmrs.password}';
@@ -139,7 +139,7 @@
             <fileset file="./lib/mysql-connector-java-5.1.13.jar"/>
         </path>
         <sql driver="${mysql.driver}"
-             url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.openmrs.db.name}?autoReconnect=true"
+             url="jdbc:mysql://${mysql.server}:${mysql.port}?autoReconnect=true"
              userid="${mysql.user}"
              classpathref="dependencies"
              password="${mysql.password}">
@@ -174,7 +174,7 @@
             <fileset file="./lib/mysql-connector-java-5.1.13.jar"/>
         </path>        
 		<sql driver="${mysql.driver}"
-             url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.quartz.db.name}?autoReconnect=true"
+             url="jdbc:mysql://${mysql.server}:${mysql.port}?autoReconnect=true"
              userid="${mysql.user}"
              classpathref="dependencies"
              password="${mysql.password}">
