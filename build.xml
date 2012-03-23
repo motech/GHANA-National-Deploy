@@ -279,14 +279,15 @@
 
     <target name="download.openmrs">
         <mkdir dir="${download.dir}"/>
-        <get username="${github.user}" password="${github.password}" dest="${download.dir}/openmrs-runtime.properties"
-             src="https://github.com/motech/GHANA-National/raw/master/ghana-national-common/src/main/resources/openmrs-data/openmrs-runtime.properties"/>
-        <get username="${github.user}" password="${github.password}" dest="${download.dir}/idgen-2.1.omod"
-             src="https://github.com/motech/GHANA-National/raw/master/ghana-national-common/src/main/resources/openmrs-data/modules/idgen-2.1.omod"/>
-        <get username="${github.user}" password="${github.password}" dest="${download.dir}/logic-0.5.0.1.omod"
-             src="https://github.com/motech/GHANA-National/raw/master/ghana-national-common/src/main/resources/openmrs-data/modules/logic-0.5.0.1.omod"/>
-        <get username="${github.user}" password="${github.password}" dest="${download.dir}/birt-2.5.2.1.omod"
-             src="https://github.com/motech/GHANA-National/raw/master/ghana-national-common/src/main/resources/openmrs-data/modules/birt-2.5.2.1.omod"/>
+
+        <get dest="${download.dir}/ghana-national-common-1.0-SNAPSHOT-resources.zip"
+             src="http://nexus.motechproject.org/content/repositories/snapshots/org/motechproject/ghana-national-common/1.0-SNAPSHOT/ghana-national-common-1.0-SNAPSHOT-resources.zip"/>
+
+        <unzip dest="${download.dir}">
+            <fileset dir="${download.dir}">
+                <include name="ghana-national-common-1.0-SNAPSHOT-resources.zip"/>
+            </fileset>
+        </unzip>
 
         <delete dir="${openmrs.directory}"/>
         <mkdir dir="${openmrs.directory}"/>
@@ -294,7 +295,7 @@
         <copy file="${download.dir}/openmrs-runtime.properties"
               tofile="${openmrs.directory}/openmrs-runtime.properties"/>
         <copy todir="${openmrs.directory}/modules">
-            <fileset dir="${download.dir}">
+            <fileset dir="${download.dir}/openmrs-data/modules">
                 <include name="**/*.omod"/>
             </fileset>
         </copy>
