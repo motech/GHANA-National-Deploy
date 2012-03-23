@@ -256,28 +256,23 @@
         <mkdir dir="${openmrs.directory}/modules/reports/output/images"/>
         <mkdir dir="${openmrs.directory}/modules/reports/logs"/>
         <mkdir dir="${openmrs.directory}/modules/reports/datasets"/>
+        <get dest="${download.dir}/reports.zip" src="https://github.com/motech/Ghana-Reports/zipball/master"/>
 
-        <get username="${github.user}" password="${github.password}"
-             dest="${openmrs.directory}/modules/reports/1.rptdesign"
-             src="https://github.com/motech/Ghana-Reports/raw/master/child-health-return.rptdesign"/>
-        <get username="${github.user}" password="${github.password}"
-             dest="${openmrs.directory}/modules/reports/2.rptdesign"
-             src="https://github.com/motech/Ghana-Reports/raw/master/communicable-disease-surveillance.rptdesign"/>
-        <get username="${github.user}" password="${github.password}"
-             dest="${openmrs.directory}/modules/reports/3.rptdesign"
-             src="https://github.com/motech/Ghana-Reports/raw/master/immunization-returns.rptdesign"/>
-        <get username="${github.user}" password="${github.password}"
-             dest="${openmrs.directory}/modules/reports/4.rptdesign"
-             src="https://github.com/motech/Ghana-Reports/raw/master/malaria.rptdesign"/>
-        <get username="${github.user}" password="${github.password}"
-             dest="${openmrs.directory}/modules/reports/5.rptdesign"
-             src="https://github.com/motech/Ghana-Reports/raw/master/mid-wife.rptdesign"/>
-        <get username="${github.user}" password="${github.password}"
-             dest="${openmrs.directory}/modules/reports/6.rptdesign"
-             src="https://github.com/motech/Ghana-Reports/raw/master/opd-morbidity.rptdesign"/>
-        <get username="${github.user}" password="${github.password}"
-             dest="${openmrs.directory}/modules/reports/7.rptdesign"
-             src="https://github.com/motech/Ghana-Reports/raw/master/opd-statement.rptdesign"/>
+        <unzip dest="${download.dir}/reports" src="${download.dir}/reports.zip"/>
+
+        <move todir="${download.dir}/reports" flatten="true">
+            <fileset dir="${download.dir}/reports">
+                <include name="**/*.rptdesign"/>
+            </fileset>
+        </move>
+
+        <copy tofile="${openmrs.directory}/modules/reports/1.rptdesign" file="${download.dir}/reports/child-health-return.rptdesign"/>
+        <copy tofile="${openmrs.directory}/modules/reports/2.rptdesign" file="${download.dir}/reports/communicable-disease-surveillance.rptdesign"/>
+        <copy tofile="${openmrs.directory}/modules/reports/3.rptdesign" file="${download.dir}/reports/immunization-returns.rptdesign"/>
+        <copy tofile="${openmrs.directory}/modules/reports/4.rptdesign" file="${download.dir}/reports/malaria.rptdesign"/>
+        <copy tofile="${openmrs.directory}/modules/reports/5.rptdesign" file="${download.dir}/reports/mid-wife.rptdesign"/>
+        <copy tofile="${openmrs.directory}/modules/reports/6.rptdesign" file="${download.dir}/reports/opd-morbidity.rptdesign"/>
+        <copy tofile="${openmrs.directory}/modules/reports/7.rptdesign" file="${download.dir}/reports/opd-statement.rptdesign"/>
     </target>
 
     <target name="deploy.idgen.omod">
@@ -299,7 +294,7 @@
         <delete dir="${openmrs.directory}"/>
         <mkdir dir="${openmrs.directory}"/>
         <mkdir dir="${openmrs.directory}/modules"/>
-        <copy file="${download.dir}/openmrs-runtime.properties"
+        <copy file="${download.dir}/openmrs-data/openmrs-runtime.properties"
               tofile="${openmrs.directory}/openmrs-runtime.properties"/>
         <copy todir="${openmrs.directory}/modules">
             <fileset dir="${download.dir}/openmrs-data/modules">
@@ -307,12 +302,15 @@
             </fileset>
         </copy>
     </target>
+
     <target name="init.migrated" depends="setup,drop.national.db,load.migrated.openmrs.schema,download.openmrs,deploy.idgen.omod,
     undeploy.openmrs,deploy.openmrs,download.latest.national.from.hudson,undeploy.national,deploy.national,download.latest.deliverytools.from.hudson,
     undeploy.deliverytools,deploy.deliverytools,load.seed.data,reload.national"/>
+
     <target name="init" depends="setup,drop.national.db,load.openmrs.schema,openmrs.quartz,openmrs.deltas,download.openmrs,
     deploy.reports,deploy.idgen.omod,undeploy.openmrs,deploy.openmrs,download.latest.national.from.hudson,undeploy.national,
     deploy.national,download.latest.deliverytools.from.hudson,undeploy.deliverytools,deploy.deliverytools,load.seed.data,reload.national"/>
+
     <target name="deploy.latest"
             depends="setup,download.latest.national.from.hudson,undeploy.national,deploy.national,load.seed.data,reload.national"/>
 </project>
