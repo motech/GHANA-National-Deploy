@@ -72,17 +72,19 @@
 
     <!-- TOMCAT TASKS /END/-->
 
-    <target name="download.latest.national.from.hudson">
+    <target name="setup">
         <delete dir="${download.dir}"/>
         <mkdir dir="${download.dir}"/>
+        <mkdir dir="${download.dir}/ghana-national-tools-1.0-SNAPSHOT"/>
+    </target>
+
+    <target name="download.latest.national.from.hudson">
         <get dest="${download.dir}/${app.name}.war"
              src="${hudson.ghana.national.url}"/>
         <echo message="downloaded ghana-national-web-${hudson.ghana.national.release.version}.war from hudson"/>
     </target>
 
     <target name="download.latest.deliverytools.from.hudson">
-        <delete dir="${download.dir}"/>
-        <mkdir dir="${download.dir}"/>
         <get dest="${download.dir}/deliverytools.war"
              src="${hudson.delivery.tools.url}"/>
         <echo message="downloaded ghana-deliverytools-web-${hudson.delivery.tools.release.version}.war from hudson"/>
@@ -172,8 +174,8 @@
     <target name="openmrs.quartz">
         <path id="dependencies">
             <fileset file="./lib/mysql-connector-java-5.1.13.jar"/>
-        </path>        
-		<sql driver="${mysql.driver}"
+        </path>
+        <sql driver="${mysql.driver}"
              url="jdbc:mysql://${mysql.server}:${mysql.port}?autoReconnect=true"
              userid="${mysql.user}"
              classpathref="dependencies"
@@ -201,9 +203,7 @@
     </target>
 
     <target name="load.seed.data">
-		<delete dir="${download.dir}"/>
-		<mkdir dir="${download.dir}"/>        
-		<get dest="${download.dir}/ghana-national-tools-1.0-SNAPSHOT.jar"
+        <get dest="${download.dir}/ghana-national-tools-1.0-SNAPSHOT.jar"
              src="http://nexus.motechproject.org/content/repositories/snapshots/org/motechproject/ghana-national-tools/1.0-SNAPSHOT/ghana-national-tools-1.0-SNAPSHOT.jar"/>
         <unzip dest="${download.dir}">
             <fileset dir="${download.dir}">
@@ -226,15 +226,11 @@
     </target>
 
     <target name="migrate.schedule.data">
-        <delete dir="${download.dir}"/>
-        <mkdir dir="${download.dir}"/>
-        <delete dir="${download.dir}/ghana-national-tools-1.0-SNAPSHOT"/>
-        <mkdir dir= "${download.dir}/ghana-national-tools-1.0-SNAPSHOT"/>
         <get dest="${download.dir}/ghana-national-tools-1.0-SNAPSHOT.jar"
              src="http://nexus.motechproject.org/content/repositories/snapshots/org/motechproject/ghana-national-tools/1.0-SNAPSHOT/ghana-national-tools-1.0-SNAPSHOT.jar"/>
         <unzip dest="${download.dir}/ghana-national-tools-1.0-SNAPSHOT">
             <fileset dir="${download.dir}">
-                <include name="ghana-national-tools-1.0-SNAPSHOT.jar" />
+                <include name="ghana-national-tools-1.0-SNAPSHOT.jar"/>
             </fileset>
         </unzip>
         <path id="lib.path">
@@ -261,32 +257,36 @@
         <mkdir dir="${openmrs.directory}/modules/reports/logs"/>
         <mkdir dir="${openmrs.directory}/modules/reports/datasets"/>
 
-        <get username="${github.user}" password="${github.password}" dest="${openmrs.directory}/modules/reports/1.rptdesign"
+        <get username="${github.user}" password="${github.password}"
+             dest="${openmrs.directory}/modules/reports/1.rptdesign"
              src="https://github.com/motech/Ghana-Reports/raw/master/child-health-return.rptdesign"/>
-        <get username="${github.user}" password="${github.password}" dest="${openmrs.directory}/modules/reports/2.rptdesign"
+        <get username="${github.user}" password="${github.password}"
+             dest="${openmrs.directory}/modules/reports/2.rptdesign"
              src="https://github.com/motech/Ghana-Reports/raw/master/communicable-disease-surveillance.rptdesign"/>
-        <get username="${github.user}" password="${github.password}" dest="${openmrs.directory}/modules/reports/3.rptdesign"
+        <get username="${github.user}" password="${github.password}"
+             dest="${openmrs.directory}/modules/reports/3.rptdesign"
              src="https://github.com/motech/Ghana-Reports/raw/master/immunization-returns.rptdesign"/>
-        <get username="${github.user}" password="${github.password}" dest="${openmrs.directory}/modules/reports/4.rptdesign"
+        <get username="${github.user}" password="${github.password}"
+             dest="${openmrs.directory}/modules/reports/4.rptdesign"
              src="https://github.com/motech/Ghana-Reports/raw/master/malaria.rptdesign"/>
-        <get username="${github.user}" password="${github.password}" dest="${openmrs.directory}/modules/reports/5.rptdesign"
+        <get username="${github.user}" password="${github.password}"
+             dest="${openmrs.directory}/modules/reports/5.rptdesign"
              src="https://github.com/motech/Ghana-Reports/raw/master/mid-wife.rptdesign"/>
-        <get username="${github.user}" password="${github.password}" dest="${openmrs.directory}/modules/reports/6.rptdesign"
+        <get username="${github.user}" password="${github.password}"
+             dest="${openmrs.directory}/modules/reports/6.rptdesign"
              src="https://github.com/motech/Ghana-Reports/raw/master/opd-morbidity.rptdesign"/>
-        <get username="${github.user}" password="${github.password}" dest="${openmrs.directory}/modules/reports/7.rptdesign"
+        <get username="${github.user}" password="${github.password}"
+             dest="${openmrs.directory}/modules/reports/7.rptdesign"
              src="https://github.com/motech/Ghana-Reports/raw/master/opd-statement.rptdesign"/>
     </target>
 
     <target name="deploy.idgen.omod">
-        <mkdir dir="${download.dir}"/>
         <get dest="${download.dir}/idgen-omod.omod"
              src="http://nexus.motechproject.org/content/repositories/snapshots/org/motechproject/idgen-omod/1.0-SNAPSHOT/idgen-omod-1.0-SNAPSHOT.jar"/>
         <copy file="${download.dir}/idgen-omod.omod" tofile="${openmrs.directory}/modules/idgen-omod.omod"/>
     </target>
 
     <target name="download.openmrs">
-        <mkdir dir="${download.dir}"/>
-
         <get dest="${download.dir}/ghana-national-common-1.0-SNAPSHOT-resources.zip"
              src="http://nexus.motechproject.org/content/repositories/snapshots/org/motechproject/ghana-national-common/1.0-SNAPSHOT/ghana-national-common-1.0-SNAPSHOT-resources.zip"/>
 
@@ -307,7 +307,12 @@
             </fileset>
         </copy>
     </target>
-    <target name="init.migrated" depends="drop.national.db,load.migrated.openmrs.schema,download.openmrs,deploy.idgen.omod,undeploy.openmrs,deploy.openmrs,download.latest.national.from.hudson,undeploy.national,deploy.national,download.latest.deliverytools.from.hudson,undeploy.deliverytools,deploy.deliverytools,load.seed.data,reload.national"/>
-    <target name="init" depends="drop.national.db,load.openmrs.schema,openmrs.quartz,openmrs.deltas,download.openmrs,deploy.reports,deploy.idgen.omod,undeploy.openmrs,deploy.openmrs,download.latest.national.from.hudson,undeploy.national,deploy.national,download.latest.deliverytools.from.hudson,undeploy.deliverytools,deploy.deliverytools,load.seed.data,reload.national"/>
-    <target name="deploy.latest" depends="download.latest.national.from.hudson,undeploy.national,deploy.national,load.seed.data,reload.national"/>
+    <target name="init.migrated" depends="setup,drop.national.db,load.migrated.openmrs.schema,download.openmrs,deploy.idgen.omod,
+    undeploy.openmrs,deploy.openmrs,download.latest.national.from.hudson,undeploy.national,deploy.national,download.latest.deliverytools.from.hudson,
+    undeploy.deliverytools,deploy.deliverytools,load.seed.data,reload.national"/>
+    <target name="init" depends="setup,drop.national.db,load.openmrs.schema,openmrs.quartz,openmrs.deltas,download.openmrs,
+    deploy.reports,deploy.idgen.omod,undeploy.openmrs,deploy.openmrs,download.latest.national.from.hudson,undeploy.national,
+    deploy.national,download.latest.deliverytools.from.hudson,undeploy.deliverytools,deploy.deliverytools,load.seed.data,reload.national"/>
+    <target name="deploy.latest"
+            depends="setup,download.latest.national.from.hudson,undeploy.national,deploy.national,load.seed.data,reload.national"/>
 </project>
