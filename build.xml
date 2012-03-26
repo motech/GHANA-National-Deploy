@@ -98,6 +98,34 @@
             <arg value="DELETE"/>
             <arg value="http://${couchdb.server}:${couchdb.port}/${couchdb.national.db}"/>
         </exec>
+        <exec executable="curl">
+            <arg value="-s"/>
+            <arg value="-S"/>
+            <arg value="-X"/>
+            <arg value="DELETE"/>
+            <arg value="http://${couchdb.server}:${couchdb.port}/${couchdb.alert.db}"/>
+        </exec>
+        <exec executable="curl">
+            <arg value="-s"/>
+            <arg value="-S"/>
+            <arg value="-X"/>
+            <arg value="DELETE"/>
+            <arg value="http://${couchdb.server}:${couchdb.port}/${couchdb.campaign.db}"/>
+        </exec>
+        <exec executable="curl">
+            <arg value="-s"/>
+            <arg value="-S"/>
+            <arg value="-X"/>
+            <arg value="DELETE"/>
+            <arg value="http://${couchdb.server}:${couchdb.port}/${couchdb.scheduletracking.db}"/>
+        </exec>
+        <exec executable="curl">
+            <arg value="-s"/>
+            <arg value="-S"/>
+            <arg value="-X"/>
+            <arg value="DELETE"/>
+            <arg value="http://${couchdb.server}:${couchdb.port}/${couchdb.appointments.db}"/>
+        </exec>
         <echo message="dropped data from couchdb in ${couchdb.server}"/>
     </target>
 
