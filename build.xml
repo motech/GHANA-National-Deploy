@@ -129,9 +129,9 @@
     <target name="openmrs.deltas">
         <sql driver="${mysql.driver}"
              url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.openmrs.db.name}?autoReconnect=true"
-             userid="${mysql.openmrs.user}"
+             userid="${mysql.user}"
              classpathref="dependencies"
-             password="${mysql.openmrs.password}">
+             password="${mysql.password}">
             <fileset dir="${basedir}/artifacts/sql/ghana/deltas">
                 <include name="*.sql"/>
             </fileset>
