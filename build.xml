@@ -375,7 +375,7 @@
     </target>
 
     <target name="init.migrated" depends="setup, drop.national.db, load.migrated.openmrs.schema, openmrs.quartz,
-    deploy.reports, download.openmrs, undeploy.openmrs, deploy.openmrs, deploy.idegen.omod, download.latest.national.from.hudson, 
+    deploy.reports, download.openmrs, undeploy.openmrs, deploy.openmrs, deploy.idgen.omod, download.latest.national.from.hudson, 
     download.latest.testapp.from.hudson, merge.test.app.to.national.app, undeploy.national, deploy.national, 
     download.latest.deliverytools.from.hudson, undeploy.deliverytools, deploy.deliverytools, load.seed.data, reload.national"/>
 
