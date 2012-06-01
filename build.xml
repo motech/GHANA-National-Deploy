@@ -13,6 +13,12 @@
         </fileset>
     </path>
 
+    <path id="classpath">
+        <fileset dir="${basedir}/lib/">
+            <include name="*.jar"/>
+        </fileset>
+    </path>
+
     <condition property="openmrs.directory" value="${user.home}/.OpenMRS" else="${user.home}/AppData/Roaming/OpenMRS">
         <os family="unix"/>
     </condition>
@@ -27,15 +33,18 @@
     <taskdef name="undeploy" classname="org.apache.catalina.ant.UndeployTask" classpathref="tomcat.classpath"/>
 
     <target name="deploy.national" description="Install">
-        <deploy url="${tomcat.manager.url}" username="${tomcat.user}" password="${tomcat.password}" path="/${app.name}" war="file:${download.dir}/${app.name}.war"/>
+        <deploy url="${tomcat.manager.url}" username="${tomcat.user}" password="${tomcat.password}" path="/${app.name}"
+                war="file:${download.dir}/${app.name}.war"/>
     </target>
 
     <target name="deploy.openmrs" description="Install">
-        <deploy url="${tomcat.manager.url}" username="${tomcat.user}" password="${tomcat.password}" path="/openmrs" war="file:${basedir}/artifacts/war/openmrs.war"/>
+        <deploy url="${tomcat.manager.url}" username="${tomcat.user}" password="${tomcat.password}" path="/openmrs"
+                war="file:${basedir}/artifacts/war/openmrs.war"/>
     </target>
 
     <target name="reload.national" description="Reload">
-        <reload url="${tomcat.manager.url}" username="${tomcat.user}" password="${tomcat.password}" path="/${app.name}"/>
+        <reload url="${tomcat.manager.url}" username="${tomcat.user}" password="${tomcat.password}"
+                path="/${app.name}"/>
     </target>
 
     <target name="reload.openmrs" description="Reload">
@@ -43,11 +52,13 @@
     </target>
 
     <target name="undeploy.national" description="Remove">
-        <undeploy url="${tomcat.manager.url}" failonerror="false" username="${tomcat.user}" password="${tomcat.password}" path="/${app.name}"/>
+        <undeploy url="${tomcat.manager.url}" failonerror="false" username="${tomcat.user}"
+                  password="${tomcat.password}" path="/${app.name}"/>
     </target>
 
     <target name="undeploy.openmrs" description="Remove">
-        <undeploy url="${tomcat.manager.url}" failonerror="false" username="${tomcat.user}" password="${tomcat.password}" path="/openmrs"/>
+        <undeploy url="${tomcat.manager.url}" failonerror="false" username="${tomcat.user}"
+                  password="${tomcat.password}" path="/openmrs"/>
     </target>
     <!-- TOMCAT TASKS /END/-->
 
@@ -117,12 +128,55 @@
         </sql>
     </target>
 
+    <target name="drop.motechmodule.databases">
+        <path id="dependencies">
+            <fileset file="./lib/mysql-connector-java-5.1.13.jar"/>
+        </path>
+        <sql driver="${mysql.driver}"
+             url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.openmrs.db.name}?autoReconnect=true"
+             userid="${mysql.user}"
+             classpathref="dependencies"
+             password="${mysql.password}">
+            use ${mysql.openmrs.db.name};
+            drop table if exists `motechmodule_blackout`;
+            drop table if exists `motechmodule_community_patient`;
+            drop table if exists `motechmodule_configuration`;
+            drop table if exists `motechmodule_defaulted_expected_encounter_alert`;
+            drop table if exists `motechmodule_defaulted_expected_obs_alert`;
+            drop table if exists `motechmodule_expected_care_message_detail_attribute`;
+            drop table if exists `motechmodule_expected_encounter`;
+            drop table if exists `motechmodule_expected_obs`;
+            drop table if exists `motechmodule_facility_patient`;
+            drop table if exists `motechmodule_incoming_message`;
+            drop table if exists `motechmodule_message`;
+            drop table if exists `motechmodule_message_language`;
+            drop table if exists `motechmodule_message_program`;
+            drop table if exists `motechmodule_message_program_state_transition`;
+            drop table if exists `motechmodule_messagedefinition_attribute`;
+            drop table if exists `motechmodule_rct_assignment`;
+            drop table if exists `motechmodule_rct_patient`;
+            drop table if exists `motechmodule_rct_stratum`;
+            drop table if exists `motechmodule_scheduledmessage`;
+            drop table if exists `motechmodule_troubledphone`;
+            drop table if exists `motechmodule_url`;
+            drop table if exists `motechmodule_user_type`;
+            drop table if exists `motechmodule_care_configuration`;
+            drop table if exists `motechmodule_community`;
+            drop table if exists `motechmodule_enrollment`;
+            drop table if exists `motechmodule_expected_care_message_detail`;
+            drop table if exists `motechmodule_message_program_state`;
+            drop table if exists `motechmodule_messagedefinition`;
+            drop table if exists `motechmodule_rct_facility`;
+        </sql>
+        <echo message="dropped motechmodule tables from openmrs database ${mysql.openmrs.db.name} in ${mysql.server}"/>
+    </target>
+
     <target name="load.seed.data">
         <get dest="${download.dir}/ghana-national-tools-1.0-SNAPSHOT.jar"
              src="http://nexus.motechproject.org/content/repositories/snapshots/org/motechproject/ghana-national-tools/1.0-SNAPSHOT/ghana-national-tools-1.0-SNAPSHOT.jar"/>
         <unzip dest="${download.dir}">
             <fileset dir="${download.dir}">
-                <include name="ghana-national-tools-1.0-SNAPSHOT.jar" />
+                <include name="ghana-national-tools-1.0-SNAPSHOT.jar"/>
             </fileset>
         </unzip>
         <path id="lib.path">
@@ -141,27 +195,34 @@
     </target>
 
     <target name="deploy.idgen.omod">
-	    <mkdir dir="${download.dir}"/>
-        <get dest="${download.dir}/idgen-omod.omod" src="http://nexus.motechproject.org/content/repositories/snapshots/org/motechproject/idgen-omod/1.0-SNAPSHOT/idgen-omod-1.0-SNAPSHOT.jar"/>
+        <mkdir dir="${download.dir}"/>
+        <get dest="${download.dir}/idgen-omod.omod"
+             src="http://nexus.motechproject.org/content/repositories/snapshots/org/motechproject/idgen-omod/1.0-SNAPSHOT/idgen-omod-1.0-SNAPSHOT.jar"/>
         <copy file="${download.dir}/idgen-omod.omod" tofile="${openmrs.directory}/modules/idgen-omod.omod"/>
     </target>
 
     <target name="download.openmrs">
         <mkdir dir="${download.dir}"/>
-        <get username="${github.user}" password="${github.password}" dest="${download.dir}/openmrs-runtime.properties" src="https://github.com/motech/GHANA-National/raw/master/ghana-national-common/src/main/resources/openmrs-data/openmrs-runtime.properties"/>
-        <get username="${github.user}" password="${github.password}" dest="${download.dir}/idgen-2.1.omod" src="https://github.com/motech/GHANA-National/raw/master/ghana-national-common/src/main/resources/openmrs-data/modules/idgen-2.1.omod"/>
-        <get username="${github.user}" password="${github.password}" dest="${download.dir}/logic-0.5.0.1.omod" src="https://github.com/motech/GHANA-National/raw/master/ghana-national-common/src/main/resources/openmrs-data/modules/logic-0.5.0.1.omod"/>
+        <get username="${github.user}" password="${github.password}" dest="${download.dir}/openmrs-runtime.properties"
+             src="https://github.com/motech/GHANA-National/raw/master/ghana-national-common/src/main/resources/openmrs-data/openmrs-runtime.properties"/>
+        <get username="${github.user}" password="${github.password}" dest="${download.dir}/idgen-2.1.omod"
+             src="https://github.com/motech/GHANA-National/raw/master/ghana-national-common/src/main/resources/openmrs-data/modules/idgen-2.1.omod"/>
+        <get username="${github.user}" password="${github.password}" dest="${download.dir}/logic-0.5.0.1.omod"
+             src="https://github.com/motech/GHANA-National/raw/master/ghana-national-common/src/main/resources/openmrs-data/modules/logic-0.5.0.1.omod"/>
 
         <delete dir="${openmrs.directory}"/>
         <mkdir dir="${openmrs.directory}"/>
         <mkdir dir="${openmrs.directory}/modules"/>
-        <copy file="${download.dir}/openmrs-runtime.properties" tofile="${openmrs.directory}/openmrs-runtime.properties"/>
+        <copy file="${download.dir}/openmrs-runtime.properties"
+              tofile="${openmrs.directory}/openmrs-runtime.properties"/>
         <copy todir="${openmrs.directory}/modules">
             <fileset dir="${download.dir}">
                 <include name="**/*.omod"/>
             </fileset>
         </copy>
     </target>
-    <target name="init" depends="drop.national.db,load.openmrs.schema,openmrs.deltas,download.openmrs,deploy.idgen.omod,undeploy.openmrs,deploy.openmrs,download.latest.national.from.hudson,undeploy.national,deploy.national,load.seed.data,reload.national"/>
-    <target name="deploy.latest" depends="download.latest.national.from.hudson,undeploy.national,deploy.national,reload.national"/>
+    <target name="init"
+            depends="drop.national.db,load.openmrs.schema,openmrs.deltas,download.openmrs,deploy.idgen.omod,undeploy.openmrs,deploy.openmrs,download.latest.national.from.hudson,undeploy.national,deploy.national,load.seed.data,reload.national"/>
+    <target name="deploy.latest"
+            depends="download.latest.national.from.hudson,undeploy.national,deploy.national,reload.national"/>
 </project>
