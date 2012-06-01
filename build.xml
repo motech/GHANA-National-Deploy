@@ -13,13 +13,7 @@
         </fileset>
     </path>
 
-    <path id="classpath">
-        <fileset dir="${basedir}/lib/">
-            <include name="*.jar"/>
-        </fileset>
-    </path>
-
-    <condition property="openmrs.directory" value="${user.home}/.OpenMRS" else="${user.home}/AppData/Roaming/OpenMRS">
+    <condition property="openmrs.directory" value="${home.dir}/.OpenMRS" else="${user.home}/AppData/Roaming/OpenMRS">
         <os family="unix"/>
     </condition>
 
@@ -42,6 +36,16 @@
                 war="file:${basedir}/artifacts/war/openmrs.war"/>
     </target>
 
+    <target name="deploy.deliverytools" description="Install">
+        <deploy url="${tomcat.manager.url}" username="${tomcat.user}" password="${tomcat.password}"
+                path="/deliverytools" war="file:${download.dir}/deliverytools.war"/>
+    </target>
+
+    <target name="deploy.gn.testapp" description="Install">
+        <deploy url="${tomcat.manager.url}" username="${tomcat.user}" password="${tomcat.password}"
+                path="/ghana-national-test" war="file:${download.dir}/ghana-national-test.war"/>
+    </target>
+
     <target name="reload.national" description="Reload">
         <reload url="${tomcat.manager.url}" username="${tomcat.user}" password="${tomcat.password}"
                 path="/${app.name}"/>
@@ -49,6 +53,11 @@
 
     <target name="reload.openmrs" description="Reload">
         <reload url="${tomcat.manager.url}" username="${tomcat.user}" password="${tomcat.password}" path="/openmrs"/>
+    </target>
+
+    <target name="reload.deliverytools" description="Reload">
+        <reload url="${tomcat.manager.url}" username="${tomcat.user}" password="${tomcat.password}"
+                path="/deliverytools"/>
     </target>
 
     <target name="undeploy.national" description="Remove">
@@ -60,15 +69,63 @@
         <undeploy url="${tomcat.manager.url}" failonerror="false" username="${tomcat.user}"
                   password="${tomcat.password}" path="/openmrs"/>
     </target>
+
+    <target name="undeploy.deliverytools" description="Remove">
+        <undeploy url="${tomcat.manager.url}" failonerror="false" username="${tomcat.user}"
+                  password="${tomcat.password}" path="/deliverytools"/>
+    </target>
+
+    <target name="undeploy.gn.testapp" description="Remove">
+        <undeploy url="${tomcat.manager.url}" failonerror="false" username="${tomcat.user}"
+                  password="${tomcat.password}" path="/ghana-national-test"/>
+    </target>
+
     <!-- TOMCAT TASKS /END/-->
 
-    <target name="download.latest.national.from.hudson">
+    <target name="setup">
         <delete dir="${download.dir}"/>
         <mkdir dir="${download.dir}"/>
-        <get dest="${download.dir}/${app.name}.war"
-             src="${hudson.url}"/>
-        <echo message="downloaded ghana-national-web-${hudson.release.version}.war from hudson"/>
+        <mkdir dir="${download.dir}/ghana-national-tools-1.0-SNAPSHOT"/>
     </target>
+
+    <target name="download.latest.national.from.hudson">
+        <get dest="${download.dir}/${app.name}.war"
+             src="${hudson.ghana.national.url}"/>
+        <echo message="downloaded ghana-national-web-${hudson.ghana.national.release.version}.war from hudson"/>
+    </target>
+
+    <target name="download.latest.deliverytools.from.hudson">
+        <get dest="${download.dir}/deliverytools.war"
+             src="${hudson.delivery.tools.url}"/>
+        <echo message="downloaded ghana-deliverytools-web-${hudson.delivery.tools.release.version}.war from hudson"/>
+    </target>
+
+
+    <target name="download.latest.testapp.from.hudson">
+        <get dest="${download.dir}/ghana-national-test.war"
+             src="${hudson.ghana.national.test.url}"/>
+        <echo message="downloaded ghana-national-test-${hudson.ghana.national.release.version}.war from hudson"/>
+    </target>
+
+
+    <target name="merge.test.app.to.national.app">
+        <delete dir="${download.dir}/temp_merge"/>
+        <mkdir dir="${download.dir}/temp_merge"/>
+        <mkdir dir="${download.dir}/temp_merge/test"/>
+        <move file="${download.dir}/${app.name}.war" tofile="${download.dir}/${app.name}_bk.war"/>
+        <unzip dest="${download.dir}/temp_merge/test">
+            <fileset dir="${download.dir}">
+                <include name="ghana-national-test.war"/>
+            </fileset>
+        </unzip>
+        <zip destfile="${download.dir}/${app.name}.war">
+            <zipfileset dir="${download.dir}/temp_merge/test/WEB-INF/classes/org" prefix="WEB-INF/classes/org"/>
+            <zipfileset dir="${download.dir}/temp_merge/test/WEB-INF/views/schedule" prefix="WEB-INF/views/schedule"/>
+            <zipfileset dir="${download.dir}/temp_merge/test/js" prefix="js" excludes="lib/*"/>
+            <zipgroupfileset dir="${download.dir}" includes="${app.name}_bk.war"/>
+        </zip>
+    </target>
+
 
     <target name="drop.national.db">
         <exec executable="curl">
@@ -78,6 +135,41 @@
             <arg value="DELETE"/>
             <arg value="http://${couchdb.server}:${couchdb.port}/${couchdb.national.db}"/>
         </exec>
+        <exec executable="curl">
+            <arg value="-s"/>
+            <arg value="-S"/>
+            <arg value="-X"/>
+            <arg value="DELETE"/>
+            <arg value="http://${couchdb.server}:${couchdb.port}/${couchdb.alert.db}"/>
+        </exec>
+        <exec executable="curl">
+            <arg value="-s"/>
+            <arg value="-S"/>
+            <arg value="-X"/>
+            <arg value="DELETE"/>
+            <arg value="http://${couchdb.server}:${couchdb.port}/${couchdb.campaign.db}"/>
+        </exec>
+        <exec executable="curl">
+            <arg value="-s"/>
+            <arg value="-S"/>
+            <arg value="-X"/>
+            <arg value="DELETE"/>
+            <arg value="http://${couchdb.server}:${couchdb.port}/${couchdb.scheduletracking.db}"/>
+        </exec>
+        <exec executable="curl">
+            <arg value="-s"/>
+            <arg value="-S"/>
+            <arg value="-X"/>
+            <arg value="DELETE"/>
+            <arg value="http://${couchdb.server}:${couchdb.port}/${couchdb.appointments.db}"/>
+        </exec>
+        <exec executable="curl">
+            <arg value="-s"/>
+            <arg value="-S"/>
+            <arg value="-X"/>
+            <arg value="DELETE"/>
+            <arg value="http://${couchdb.server}:${couchdb.port}/${couchdb.cms.db}"/>
+        </exec>
         <echo message="dropped data from couchdb in ${couchdb.server}"/>
     </target>
 
@@ -86,11 +178,11 @@
             <fileset file="./lib/mysql-connector-java-5.1.13.jar"/>
         </path>
         <sql driver="${mysql.driver}"
-             url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.openmrs.db.name}?autoReconnect=true"
+             url="jdbc:mysql://${mysql.server}:${mysql.port}?autoReconnect=true"
              userid="${mysql.user}"
              classpathref="dependencies"
              password="${mysql.password}">
-            drop database ${mysql.openmrs.db.name};
+            drop database if exists ${mysql.openmrs.db.name};
             create database ${mysql.openmrs.db.name} default charset utf8;
             grant all on ${mysql.openmrs.db.name}.* to '${mysql.openmrs.user}'@'localhost' identified by
             '${mysql.openmrs.password}';
@@ -116,16 +208,93 @@
         <echo message="recreated schema for ${mysql.openmrs.db.name}"/>
     </target>
 
+    <target name="load.migrated.openmrs.schema">
+        <path id="dependencies">
+            <fileset file="./lib/mysql-connector-java-5.1.13.jar"/>
+        </path>
+        <sql driver="${mysql.driver}"
+             url="jdbc:mysql://${mysql.server}:${mysql.port}?autoReconnect=true"
+             userid="${mysql.user}"
+             classpathref="dependencies"
+             password="${mysql.password}">
+            drop database if exists ${mysql.openmrs.db.name};
+            create database ${mysql.openmrs.db.name} default charset utf8;
+            grant all on ${mysql.openmrs.db.name}.* to '${mysql.openmrs.user}'@'localhost' identified by
+            '${mysql.openmrs.password}';
+            grant all on ${mysql.openmrs.db.name}.* to '${mysql.openmrs.user}'@'%' identified by
+            '${mysql.openmrs.password}';
+            flush privileges;
+        </sql>
+        <echo message="dropped openmrs database ${mysql.openmrs.db.name} in ${mysql.server}"/>
+        <exec executable="cmd" osfamily="windows">
+            <arg value="/c"/>
+            <arg value="${basedir}\artifacts\sql\ghana\load_schema.bat"/>
+            <arg value="${mysql.user}"/>
+            <arg value="${mysql.password}"/>
+            <arg value="${mysql.openmrs.db.name}"/>
+            <arg value="${basedir}\artifacts\sql\ghana\0.openmrs.1.8.migrated.sql"/>
+        </exec>
+        <exec executable="${basedir}/artifacts/sql/ghana/load_schema.sh" osfamily="unix">
+            <arg value="${mysql.user}"/>
+            <arg value="${mysql.password}"/>
+            <arg value="${mysql.openmrs.db.name}"/>
+            <arg value="${basedir}/artifacts/sql/ghana/0.openmrs.1.8.migrated.sql"/>
+        </exec>
+        <echo message="recreated schema for ${mysql.openmrs.db.name}"/>
+    </target>
+
+    <target name="openmrs.quartz">
+        <path id="dependencies">
+            <fileset file="./lib/mysql-connector-java-5.1.13.jar"/>
+        </path>
+        <sql driver="${mysql.driver}"
+             url="jdbc:mysql://${mysql.server}:${mysql.port}?autoReconnect=true"
+             userid="${mysql.user}"
+             classpathref="dependencies"
+             password="${mysql.password}">
+            <fileset dir="${basedir}/artifacts/sql/ghana">
+                <include name="create_db_schema_quartz_v1.8.sql"/>
+            </fileset>
+        </sql>
+        <echo message="creation of ${mysql.quartz.db.name} db successful."/>
+    </target>
+
     <target name="openmrs.deltas">
+        <path id="dependencies">
+            <fileset file="./lib/mysql-connector-java-5.1.13.jar"/>
+        </path>
         <sql driver="${mysql.driver}"
              url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.openmrs.db.name}?autoReconnect=true"
-             userid="${mysql.openmrs.user}"
+             userid="${mysql.user}"
              classpathref="dependencies"
-             password="${mysql.openmrs.password}">
+             password="${mysql.password}">
             <fileset dir="${basedir}/artifacts/sql/ghana/deltas">
                 <include name="*.sql"/>
             </fileset>
         </sql>
+    </target>
+
+    <target name="load.seed.data">
+        <get dest="${download.dir}/ghana-national-tools.jar"
+             src="${hudson.ghana.national.tools.url}"/>
+        <unzip dest="${download.dir}">
+            <fileset dir="${download.dir}">
+                <include name="ghana-national-tools.jar"/>
+            </fileset>
+        </unzip>
+        <path id="lib.path">
+            <fileset dir="${tomcat.home}/webapps/${app.name}/WEB-INF/lib" includes="**/*.jar"/>
+            <fileset dir="${tomcat.home}/lib" includes="**/*.jar"/>
+        </path>
+        <echo message="please wait ..."/>
+        <java fork="false" classname="${couchdb.seed.main.class}">
+            <classpath>
+                <path location="${tomcat.home}/webapps/${app.name}/WEB-INF/classes"/>
+                <path location="${download.dir}"/>
+                <path refid="lib.path"/>
+            </classpath>
+        </java>
+        <echo message="seed data loaded into ${couchdb.national.db} database"/>
     </target>
 
     <target name="drop.motechmodule.databases">
@@ -171,10 +340,10 @@
         <echo message="dropped motechmodule tables from openmrs database ${mysql.openmrs.db.name} in ${mysql.server}"/>
     </target>
 
-    <target name="load.seed.data">
+    <target name="migrate.schedule.data">
         <get dest="${download.dir}/ghana-national-tools-1.0-SNAPSHOT.jar"
-             src="http://nexus.motechproject.org/content/repositories/snapshots/org/motechproject/ghana-national-tools/1.0-SNAPSHOT/ghana-national-tools-1.0-SNAPSHOT.jar"/>
-        <unzip dest="${download.dir}">
+             src="${hudson.ghana.national.tools.url}"/>
+        <unzip dest="${download.dir}/ghana-national-tools-1.0-SNAPSHOT">
             <fileset dir="${download.dir}">
                 <include name="ghana-national-tools-1.0-SNAPSHOT.jar"/>
             </fileset>
@@ -184,45 +353,86 @@
             <fileset dir="${tomcat.home}/lib" includes="**/*.jar"/>
         </path>
         <echo message="please wait ..."/>
-        <java fork="false" classname="${couchdb.seed.main.class}">
+        <java fork="false" classname="${migration.main.class}">
             <classpath>
                 <path location="${tomcat.home}/webapps/${app.name}/WEB-INF/classes"/>
-                <path location="${download.dir}"/>
                 <path refid="lib.path"/>
+                <path location="${download.dir}/ghana-national-tools-1.0-SNAPSHOT"/>
             </classpath>
         </java>
-        <echo message="seed data loaded into ${couchdb.national.db} database"/>
+        <echo message="Schedule data loaded into ${couchdb.national.db} database"/>
+    </target>
+
+    <target name="deploy.reports">
+        <delete dir="${openmrs.directory}/modules/reports"/>
+        <mkdir dir="${openmrs.directory}/modules/reports"/>
+        <mkdir dir="${openmrs.directory}/modules/reports/output"/>
+        <mkdir dir="${openmrs.directory}/modules/reports/output/images"/>
+        <mkdir dir="${openmrs.directory}/modules/reports/logs"/>
+        <mkdir dir="${openmrs.directory}/modules/reports/datasets"/>
+        <get dest="${download.dir}/reports.zip" src="https://github.com/motech/Ghana-Reports/zipball/master"/>
+
+        <unzip dest="${download.dir}/reports" src="${download.dir}/reports.zip"/>
+
+        <move todir="${download.dir}/reports" flatten="true">
+            <fileset dir="${download.dir}/reports">
+                <include name="**/*.rptdesign"/>
+            </fileset>
+        </move>
+
+        <copy tofile="${openmrs.directory}/modules/reports/1.rptdesign"
+              file="${download.dir}/reports/child-health-return.rptdesign"/>
+        <copy tofile="${openmrs.directory}/modules/reports/2.rptdesign"
+              file="${download.dir}/reports/communicable-disease-surveillance.rptdesign"/>
+        <copy tofile="${openmrs.directory}/modules/reports/3.rptdesign"
+              file="${download.dir}/reports/immunization-returns.rptdesign"/>
+        <copy tofile="${openmrs.directory}/modules/reports/4.rptdesign"
+              file="${download.dir}/reports/malaria.rptdesign"/>
+        <copy tofile="${openmrs.directory}/modules/reports/5.rptdesign"
+              file="${download.dir}/reports/mid-wife.rptdesign"/>
+        <copy tofile="${openmrs.directory}/modules/reports/6.rptdesign"
+              file="${download.dir}/reports/opd-morbidity.rptdesign"/>
+        <copy tofile="${openmrs.directory}/modules/reports/7.rptdesign"
+              file="${download.dir}/reports/opd-statement.rptdesign"/>
     </target>
 
     <target name="deploy.idgen.omod">
-        <mkdir dir="${download.dir}"/>
         <get dest="${download.dir}/idgen-omod.omod"
              src="http://nexus.motechproject.org/content/repositories/snapshots/org/motechproject/idgen-omod/1.0-SNAPSHOT/idgen-omod-1.0-SNAPSHOT.jar"/>
         <copy file="${download.dir}/idgen-omod.omod" tofile="${openmrs.directory}/modules/idgen-omod.omod"/>
     </target>
 
     <target name="download.openmrs">
-        <mkdir dir="${download.dir}"/>
-        <get username="${github.user}" password="${github.password}" dest="${download.dir}/openmrs-runtime.properties"
-             src="https://github.com/motech/GHANA-National/raw/master/ghana-national-common/src/main/resources/openmrs-data/openmrs-runtime.properties"/>
-        <get username="${github.user}" password="${github.password}" dest="${download.dir}/idgen-2.1.omod"
-             src="https://github.com/motech/GHANA-National/raw/master/ghana-national-common/src/main/resources/openmrs-data/modules/idgen-2.1.omod"/>
-        <get username="${github.user}" password="${github.password}" dest="${download.dir}/logic-0.5.0.1.omod"
-             src="https://github.com/motech/GHANA-National/raw/master/ghana-national-common/src/main/resources/openmrs-data/modules/logic-0.5.0.1.omod"/>
+        <get dest="${download.dir}/ghana-national-common-1.0-SNAPSHOT-resources.zip"
+             src="http://nexus.motechproject.org/content/repositories/snapshots/org/motechproject/ghana-national-common/1.0-SNAPSHOT/ghana-national-common-1.0-SNAPSHOT-resources.zip"/>
+
+        <unzip dest="${download.dir}">
+            <fileset dir="${download.dir}">
+                <include name="ghana-national-common-1.0-SNAPSHOT-resources.zip"/>
+            </fileset>
+        </unzip>
 
         <delete dir="${openmrs.directory}"/>
         <mkdir dir="${openmrs.directory}"/>
         <mkdir dir="${openmrs.directory}/modules"/>
-        <copy file="${download.dir}/openmrs-runtime.properties"
+        <copy file="${download.dir}/openmrs-data/openmrs-runtime.properties"
               tofile="${openmrs.directory}/openmrs-runtime.properties"/>
         <copy todir="${openmrs.directory}/modules">
-            <fileset dir="${download.dir}">
+            <fileset dir="${download.dir}/openmrs-data/modules">
                 <include name="**/*.omod"/>
             </fileset>
         </copy>
     </target>
-    <target name="init"
-            depends="drop.national.db,load.openmrs.schema,openmrs.deltas,download.openmrs,deploy.idgen.omod,undeploy.openmrs,deploy.openmrs,download.latest.national.from.hudson,undeploy.national,deploy.national,load.seed.data,reload.national"/>
+
+    <target name="init.migrated" depends="setup, drop.national.db, load.migrated.openmrs.schema, openmrs.quartz,
+    deploy.reports, download.openmrs, undeploy.openmrs, deploy.openmrs, deploy.idgen.omod, download.latest.national.from.hudson, 
+    download.latest.testapp.from.hudson, merge.test.app.to.national.app, undeploy.national, deploy.national, 
+    download.latest.deliverytools.from.hudson, undeploy.deliverytools, deploy.deliverytools, load.seed.data, reload.national"/>
+
+    <target name="init" depends="setup, drop.national.db, load.openmrs.schema, openmrs.quartz, openmrs.deltas,
+    deploy.reports, download.openmrs, undeploy.openmrs, deploy.openmrs, deploy.idgen.omod, download.latest.national.from.hudson, download.latest.testapp.from.hudson, merge.test.app.to.national.app,
+    undeploy.national, deploy.national, download.latest.deliverytools.from.hudson, undeploy.deliverytools, deploy.deliverytools, load.seed.data, reload.national"/>
+
     <target name="deploy.latest"
-            depends="download.latest.national.from.hudson,undeploy.national,deploy.national,reload.national"/>
+            depends="setup,download.latest.national.from.hudson,download.latest.testapp.from.hudson, merge.test.app.to.national.app,undeploy.national,deploy.national,load.seed.data,reload.national"/>
 </project>
