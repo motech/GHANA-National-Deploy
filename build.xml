@@ -190,22 +190,6 @@
             '${mysql.openmrs.password}';
             flush privileges;
         </sql>
-        <echo message="dropped openmrs database ${mysql.openmrs.db.name} in ${mysql.server}"/>
-        <exec executable="cmd" osfamily="windows">
-            <arg value="/c"/>
-            <arg value="${basedir}\artifacts\sql\ghana\load_schema.bat"/>
-            <arg value="${mysql.user}"/>
-            <arg value="${mysql.password}"/>
-            <arg value="${mysql.openmrs.db.name}"/>
-            <arg value="${basedir}\artifacts\sql\ghana\0.openmrs-1.8.sql"/>
-        </exec>
-        <exec executable="${basedir}/artifacts/sql/ghana/load_schema.sh" osfamily="unix">
-            <arg value="${mysql.user}"/>
-            <arg value="${mysql.password}"/>
-            <arg value="${mysql.openmrs.db.name}"/>
-            <arg value="${basedir}/artifacts/sql/ghana/0.openmrs-1.8.sql"/>
-        </exec>
-        <echo message="recreated schema for ${mysql.openmrs.db.name}"/>
     </target>
 
     <target name="load.migrated.openmrs.schema">
