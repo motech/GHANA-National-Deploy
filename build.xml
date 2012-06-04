@@ -260,18 +260,27 @@
     </target>
 
     <target name="openmrs.deltas">
+        <unzip dest="${download.dir}/ghana-national-web"
+               src="${download.dir}/ghana-national-web.war">
+        </unzip>
+        <mkdir dir="../build"/>
+        <move todir="../build">
+            <fileset dir="${download.dir}/ghana-national-web/build"/>
+        </move>
         <path id="dependencies">
-            <fileset file="./lib/mysql-connector-java-5.1.13.jar"/>
+            <fileset dir="./lib/" includes="*.jar"/>
         </path>
-        <sql driver="${mysql.driver}"
-             url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.openmrs.db.name}?autoReconnect=true"
-             userid="${mysql.user}"
-             classpathref="dependencies"
-             password="${mysql.password}">
-            <fileset dir="${basedir}/artifacts/sql/ghana/deltas">
-                <include name="*.sql"/>
-            </fileset>
-        </sql>
+        <taskdef resource="liquibasetasks.properties">
+            <classpath refid="dependencies"/>
+        </taskdef>
+        <updateDatabase
+                changeLogFile="../build/sql/master.xml"
+                driver="${mysql.driver}"
+                url="${mysql.url}"
+                username="${mysql.user}"
+                password="${mysql.password}"
+                dropFirst="false"
+                classpathref="dependencies"/>
     </target>
 
     <target name="load.seed.data">
