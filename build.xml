@@ -122,7 +122,7 @@
 		    <zipfileset dir="${download.dir}/temp_merge/test/WEB-INF/classes/org" prefix="WEB-INF/classes/org"/>
 		    <zipfileset dir="${download.dir}/temp_merge/test/WEB-INF/views/schedule" prefix="WEB-INF/views/schedule"/>
 		    <zipfileset dir="${download.dir}/temp_merge/test/js" prefix="js" excludes="lib/*"/>
-			<zipgroupfileset dir="." includes="${download.dir}/${app.name}_bk.war"/>
+			<zipgroupfileset dir="${download.dir}" includes="${app.name}_bk.war"/>
   		</zip>
 	</target>
 
