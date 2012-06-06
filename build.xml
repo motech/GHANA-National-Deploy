@@ -112,17 +112,17 @@
 		<delete dir="${download.dir}/temp_merge"/>
 		<mkdir dir="${download.dir}/temp_merge"/>
 		<mkdir dir="${download.dir}/temp_merge/test"/>
-		<move file="${download.dir}/ghana-national-web-1.0-SNAPSHOT.war" tofile="${download.dir}/ghana-national-web-1.0-SNAPSHOT_bk.war"/>        
+		<move file="${download.dir}/${app.name}.war" tofile="${download.dir}/${app.name}_bk.war"/>        
 		<unzip dest="${download.dir}/temp_merge/test">
             <fileset dir="${download.dir}">
-                <include name="ghana-national-test-1.0-SNAPSHOT.war"/>
+                <include name="ghana-national-test.war"/>
             </fileset>
         </unzip>	
-		<zip destfile="${download.dir}/ghana-national-web-1.0-SNAPSHOT.war">
+		<zip destfile="${download.dir}/${app.name}.war">
 		    <zipfileset dir="${download.dir}/temp_merge/test/WEB-INF/classes/org" prefix="WEB-INF/classes/org"/>
 		    <zipfileset dir="${download.dir}/temp_merge/test/WEB-INF/views/schedule" prefix="WEB-INF/views/schedule"/>
 		    <zipfileset dir="${download.dir}/temp_merge/test/js" prefix="js" excludes="lib/*"/>
-			<zipgroupfileset dir="." includes="${download.dir}/ghana-national-web-1.0-SNAPSHOT_bk.war"/>
+			<zipgroupfileset dir="." includes="${download.dir}/${app.name}_bk.war"/>
   		</zip>
 	</target>
 
