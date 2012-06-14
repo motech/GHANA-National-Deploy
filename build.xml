@@ -107,7 +107,6 @@
         <echo message="downloaded ghana-national-test-${hudson.ghana.national.release.version}.war from hudson"/>
     </target>
 
-
     <target name="merge.test.app.to.national.app">
         <delete dir="${download.dir}/temp_merge"/>
         <mkdir dir="${download.dir}/temp_merge"/>
@@ -125,7 +124,6 @@
             <zipgroupfileset dir="${download.dir}" includes="${app.name}_bk.war"/>
         </zip>
     </target>
-
 
     <target name="drop.national.db">
         <exec executable="curl">
@@ -288,6 +286,17 @@
             </classpath>
         </java>
         <echo message="seed data loaded into ${couchdb.national.db} database"/>
+    </target>
+
+    <target name="load.audio.files">
+        <delete dir="audio"/>
+        <exec executable="git">
+            <arg value="clone"/>
+            <arg value="--depth"/>
+            <arg value="1"/>
+            <arg value="git@github.com:motech/Ghana-National-Audio.git"/>
+            <arg value="audio"/>
+        </exec>
     </target>
 
     <target name="drop.motechmodule.databases">

@@ -1,1 +1,0 @@
-insert into encounter_type (name,description,creator,date_created,retired,uuid) values ('PATIENTEDITVISIT','Ghana Patient Edit Visit','1','2012-01-12 13:13:07','0','3fa9d4zz-e8ec-11e0-8e86-a9cbfc8ed377');
