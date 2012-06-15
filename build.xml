@@ -435,8 +435,8 @@
     download.latest.deliverytools.from.hudson, undeploy.deliverytools, deploy.deliverytools, load.seed.data, reload.national"/>
 
     <target name="init" depends="setup, drop.national.db, load.openmrs.schema, openmrs.quartz,
-    download.openmrs, undeploy.openmrs, deploy.openmrs, deploy.reports, deploy.idgen.omod, download.latest.national.from.hudson, download.latest.testapp.from.hudson, merge.test.app.to.national.app,
-    undeploy.national, deploy.national, download.latest.deliverytools.from.hudson, undeploy.deliverytools, deploy.deliverytools, openmrs.deltas, load.seed.data, reload.national"/>
+    download.openmrs, undeploy.openmrs, deploy.openmrs, download.latest.national.from.hudson, download.latest.testapp.from.hudson, merge.test.app.to.national.app,
+    undeploy.national, deploy.national, download.latest.deliverytools.from.hudson, undeploy.deliverytools, deploy.deliverytools, openmrs.deltas, deploy.reports, deploy.idgen.omod, load.seed.data, reload.national"/>
 
     <target name="deploy.latest"
             depends="setup,download.latest.national.from.hudson,download.latest.testapp.from.hudson, merge.test.app.to.national.app,undeploy.national,deploy.national,openmrs.deltas, load.seed.data,reload.national"/>
