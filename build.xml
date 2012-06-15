@@ -12,6 +12,9 @@
             <include name="*.jar"/>
         </fileset>
     </path>
+    <path id="mysql.classpath">
+        <fileset file="${basedir}/lib/mysql-connector-java-5.1.13.jar"/>
+    </path>
 
     <condition property="openmrs.directory" value="${home.dir}/.OpenMRS" else="${user.home}/AppData/Roaming/OpenMRS">
         <os family="unix"/>
@@ -172,13 +175,10 @@
     </target>
 
     <target name="load.openmrs.schema">
-        <path id="dependencies">
-            <fileset file="./lib/mysql-connector-java-5.1.13.jar"/>
-        </path>
         <sql driver="${mysql.driver}"
              url="jdbc:mysql://${mysql.server}:${mysql.port}?autoReconnect=true"
              userid="${mysql.user}"
-             classpathref="dependencies"
+             classpathref="mysql.classpath"
              password="${mysql.password}">
             drop database if exists ${mysql.openmrs.db.name};
             create database ${mysql.openmrs.db.name} default charset utf8;
@@ -191,13 +191,10 @@
     </target>
 
     <target name="load.migrated.openmrs.schema">
-        <path id="dependencies">
-            <fileset file="./lib/mysql-connector-java-5.1.13.jar"/>
-        </path>
         <sql driver="${mysql.driver}"
              url="jdbc:mysql://${mysql.server}:${mysql.port}?autoReconnect=true"
              userid="${mysql.user}"
-             classpathref="dependencies"
+             classpathref="mysql.classpath"
              password="${mysql.password}">
             drop database if exists ${mysql.openmrs.db.name};
             create database ${mysql.openmrs.db.name} default charset utf8;
@@ -226,13 +223,10 @@
     </target>
 
     <target name="openmrs.quartz">
-        <path id="dependencies">
-            <fileset file="./lib/mysql-connector-java-5.1.13.jar"/>
-        </path>
         <sql driver="${mysql.driver}"
              url="jdbc:mysql://${mysql.server}:${mysql.port}?autoReconnect=true"
              userid="${mysql.user}"
-             classpathref="dependencies"
+             classpathref="mysql.classpath"
              password="${mysql.password}">
             <fileset dir="${basedir}/artifacts/sql/ghana">
                 <include name="create_db_schema_quartz_v1.8.sql"/>
@@ -300,13 +294,10 @@
     </target>
 
     <target name="drop.motechmodule.databases">
-        <path id="dependencies">
-            <fileset file="./lib/mysql-connector-java-5.1.13.jar"/>
-        </path>
         <sql driver="${mysql.driver}"
              url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.openmrs.db.name}?autoReconnect=true"
              userid="${mysql.user}"
-             classpathref="dependencies"
+             classpathref="mysql.classpath"
              password="${mysql.password}">
             use ${mysql.openmrs.db.name};
             drop table if exists `motechmodule_blackout`;
@@ -366,6 +357,17 @@
     </target>
 
     <target name="deploy.reports">
+        <replace file="${basedir}/artifacts/sql/ghana/birt.sql" token="@OPENMRS@" value="${openmrs.directory}"/>
+        <sql driver="${mysql.driver}"
+             url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.openmrs.db.name}?autoReconnect=true"
+             userid="${mysql.user}"
+             classpathref="mysql.classpath"
+             password="${mysql.password}">
+            <fileset dir="${basedir}/artifacts/sql/ghana">
+                <include name="birt.sql"/>
+            </fileset>
+        </sql>
+
         <delete dir="${openmrs.directory}/modules/reports"/>
         <mkdir dir="${openmrs.directory}/modules/reports"/>
         <mkdir dir="${openmrs.directory}/modules/reports/output"/>
