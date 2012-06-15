@@ -368,12 +368,12 @@
             </fileset>
         </sql>
 
-        <delete dir="${openmrs.directory}/modules/reports"/>
-        <mkdir dir="${openmrs.directory}/modules/reports"/>
-        <mkdir dir="${openmrs.directory}/modules/reports/output"/>
-        <mkdir dir="${openmrs.directory}/modules/reports/output/images"/>
-        <mkdir dir="${openmrs.directory}/modules/reports/logs"/>
-        <mkdir dir="${openmrs.directory}/modules/reports/datasets"/>
+        <delete dir="${openmrs.directory}/reports"/>
+        <mkdir dir="${openmrs.directory}/reports"/>
+        <mkdir dir="${openmrs.directory}/reports/output"/>
+        <mkdir dir="${openmrs.directory}/reports/output/images"/>
+        <mkdir dir="${openmrs.directory}/reports/logs"/>
+        <mkdir dir="${openmrs.directory}/reports/datasets"/>
         <get dest="${download.dir}/reports.zip" src="https://github.com/motech/Ghana-Reports/zipball/master"/>
 
         <unzip dest="${download.dir}/reports" src="${download.dir}/reports.zip"/>
@@ -384,19 +384,19 @@
             </fileset>
         </move>
 
-        <copy tofile="${openmrs.directory}/modules/reports/1.rptdesign"
+        <copy tofile="${openmrs.directory}/reports/1.rptdesign"
               file="${download.dir}/reports/child-health-return.rptdesign"/>
-        <copy tofile="${openmrs.directory}/modules/reports/2.rptdesign"
+        <copy tofile="${openmrs.directory}/reports/2.rptdesign"
               file="${download.dir}/reports/communicable-disease-surveillance.rptdesign"/>
-        <copy tofile="${openmrs.directory}/modules/reports/3.rptdesign"
+        <copy tofile="${openmrs.directory}/reports/3.rptdesign"
               file="${download.dir}/reports/immunization-returns.rptdesign"/>
-        <copy tofile="${openmrs.directory}/modules/reports/4.rptdesign"
+        <copy tofile="${openmrs.directory}/reports/4.rptdesign"
               file="${download.dir}/reports/malaria.rptdesign"/>
-        <copy tofile="${openmrs.directory}/modules/reports/5.rptdesign"
+        <copy tofile="${openmrs.directory}/reports/5.rptdesign"
               file="${download.dir}/reports/mid-wife.rptdesign"/>
-        <copy tofile="${openmrs.directory}/modules/reports/6.rptdesign"
+        <copy tofile="${openmrs.directory}/reports/6.rptdesign"
               file="${download.dir}/reports/opd-morbidity.rptdesign"/>
-        <copy tofile="${openmrs.directory}/modules/reports/7.rptdesign"
+        <copy tofile="${openmrs.directory}/reports/7.rptdesign"
               file="${download.dir}/reports/opd-statement.rptdesign"/>
     </target>
 
