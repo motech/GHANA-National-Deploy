@@ -88,7 +88,7 @@
     <target name="setup">
         <delete dir="${download.dir}"/>
         <mkdir dir="${download.dir}"/>
-        <mkdir dir="${download.dir}/ghana-national-tools-1.0-SNAPSHOT"/>
+        <mkdir dir="${download.dir}/${ghana.national.tools.name}"/>
     </target>
 
     <target name="download.latest.national.from.hudson">
@@ -191,11 +191,7 @@
     </target>
 
     <target name="load.migrated.openmrs.schema">
-        <sql driver="${mysql.driver}"
-             url="jdbc:mysql://${mysql.server}:${mysql.port}?autoReconnect=true"
-             userid="${mysql.user}"
-             classpathref="mysql.classpath"
-             password="${mysql.password}">
+        <sql driver="${mysql.driver}" url="jdbc:mysql://${mysql.server}:${mysql.port}?autoReconnect=true" userid="${mysql.user}" classpathref="mysql.classpath" password="${mysql.password}">
             drop database if exists ${mysql.openmrs.db.name};
             create database ${mysql.openmrs.db.name} default charset utf8;
             grant all on ${mysql.openmrs.db.name}.* to '${mysql.openmrs.user}'@'localhost' identified by
@@ -223,11 +219,7 @@
     </target>
 
     <target name="openmrs.quartz">
-        <sql driver="${mysql.driver}"
-             url="jdbc:mysql://${mysql.server}:${mysql.port}?autoReconnect=true"
-             userid="${mysql.user}"
-             classpathref="mysql.classpath"
-             password="${mysql.password}">
+        <sql driver="${mysql.driver}" url="jdbc:mysql://${mysql.server}:${mysql.port}?autoReconnect=true" userid="${mysql.user}" classpathref="mysql.classpath" password="${mysql.password}">
             <fileset dir="${basedir}/artifacts/sql/ghana">
                 <include name="create_db_schema_quartz_v1.8.sql"/>
             </fileset>
@@ -249,14 +241,8 @@
         <taskdef resource="liquibasetasks.properties">
             <classpath refid="dependencies"/>
         </taskdef>
-        <updateDatabase
-                changeLogFile="../build/sql/master.xml"
-                driver="${mysql.driver}"
-                url="${mysql.url}"
-                username="${mysql.user}"
-                password="${mysql.password}"
-                dropFirst="false"
-                classpathref="dependencies"/>
+        <updateDatabase changeLogFile="../build/sql/master.xml" driver="${mysql.driver}" url="${mysql.url}" username="${mysql.user}" password="${mysql.password}" dropFirst="false"
+                        classpathref="dependencies"/>
     </target>
 
     <target name="load.seed.data" depends="download.tools.jar">
@@ -276,11 +262,11 @@
     </target>
 
     <target name="download.tools.jar">
-        <get dest="${download.dir}/ghana-national-tools.jar"
+        <get dest="${download.dir}/${ghana.national.tools.name}.jar"
              src="${hudson.ghana.national.tools.url}"/>
         <unzip dest="${download.dir}">
             <fileset dir="${download.dir}">
-                <include name="ghana-national-tools.jar"/>
+                <include name="${ghana.national.tools.name}.jar"/>
             </fileset>
         </unzip>
     </target>
@@ -312,10 +298,7 @@
     </target>
 
     <target name="drop.motechmodule.databases">
-        <sql driver="${mysql.driver}"
-             url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.openmrs.db.name}?autoReconnect=true"
-             userid="${mysql.user}"
-             classpathref="mysql.classpath"
+        <sql driver="${mysql.driver}" url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.openmrs.db.name}?autoReconnect=true" userid="${mysql.user}" classpathref="mysql.classpath"
              password="${mysql.password}">
             use ${mysql.openmrs.db.name};
             drop table if exists `motechmodule_blackout`;
@@ -361,7 +344,7 @@
             <classpath>
                 <path location="${tomcat.home}/webapps/${app.name}/WEB-INF/classes"/>
                 <path refid="lib.path"/>
-                <path location="${download.dir}/ghana-national-tools-1.0-SNAPSHOT"/>
+                <path location="${download.dir}/${ghana.national.tools.name}"/>
             </classpath>
         </java>
         <echo message="Schedule data loaded into ${couchdb.national.db} database"/>
@@ -369,10 +352,7 @@
 
     <target name="deploy.reports">
         <replace file="${basedir}/artifacts/sql/ghana/birt.sql" token="@OPENMRS@" value="${openmrs.directory}"/>
-        <sql driver="${mysql.driver}"
-             url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.openmrs.db.name}?autoReconnect=true"
-             userid="${mysql.user}"
-             classpathref="mysql.classpath"
+        <sql driver="${mysql.driver}" url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.openmrs.db.name}?autoReconnect=true" userid="${mysql.user}" classpathref="mysql.classpath"
              password="${mysql.password}">
             <fileset dir="${basedir}/artifacts/sql/ghana">
                 <include name="birt.sql"/>
@@ -406,8 +386,7 @@
     </target>
 
     <target name="deploy.idgen.omod">
-        <get dest="${download.dir}/idgen-omod.omod"
-             src="http://nexus.motechproject.org/content/repositories/snapshots/org/motechproject/idgen-omod/1.0-SNAPSHOT/idgen-omod-1.0-SNAPSHOT.jar"/>
+        <get dest="${download.dir}/idgen-omod.omod" src="http://nexus.motechproject.org/content/repositories/snapshots/org/motechproject/idgen-omod/1.0-SNAPSHOT/idgen-omod-1.0-SNAPSHOT.jar"/>
         <copy file="${download.dir}/idgen-omod.omod" tofile="${openmrs.directory}/modules/idgen-omod.omod"/>
     </target>
 
@@ -432,15 +411,14 @@
         </copy>
     </target>
 
-    <target name="init.migrated" depends="setup, drop.national.db, load.migrated.openmrs.schema, openmrs.quartz,
-    deploy.reports, download.openmrs, undeploy.openmrs, deploy.openmrs, deploy.idgen.omod, download.latest.national.from.hudson, 
-    download.latest.testapp.from.hudson, merge.test.app.to.national.app, undeploy.national, deploy.national, 
-    download.latest.deliverytools.from.hudson, undeploy.deliverytools, deploy.deliverytools, load.seed.data, reload.national"/>
+    <target name="init.migrated" depends="setup, drop.national.db, load.migrated.openmrs.schema, openmrs.quartz, deploy.reports, download.openmrs, undeploy.openmrs, deploy.openmrs, deploy.idgen.omod, 
+    download.latest.national.from.hudson, download.latest.testapp.from.hudson, merge.test.app.to.national.app, undeploy.national, deploy.national, download.latest.deliverytools.from.hudson, 
+    undeploy.deliverytools, deploy.deliverytools, load.seed.data, reload.national"/>
 
-    <target name="init" depends="setup, drop.national.db, load.openmrs.schema, openmrs.quartz,
-    download.openmrs, undeploy.openmrs, deploy.openmrs, download.latest.national.from.hudson, download.latest.testapp.from.hudson, merge.test.app.to.national.app,
-    undeploy.national, deploy.national, download.latest.deliverytools.from.hudson, undeploy.deliverytools, deploy.deliverytools, openmrs.deltas, deploy.reports, deploy.idgen.omod, load.seed.data, reload.national"/>
+    <target name="init" depends="setup, drop.national.db, load.openmrs.schema, openmrs.quartz, download.openmrs, undeploy.openmrs, deploy.openmrs, download.latest.national.from.hudson, 
+    download.latest.testapp.from.hudson, merge.test.app.to.national.app, undeploy.national, deploy.national, download.latest.deliverytools.from.hudson, undeploy.deliverytools, deploy.deliverytools, 
+    openmrs.deltas, deploy.reports, deploy.idgen.omod, load.seed.data, reload.national"/>
 
-    <target name="deploy.latest"
-            depends="setup,download.latest.national.from.hudson,download.latest.testapp.from.hudson, merge.test.app.to.national.app,undeploy.national,deploy.national,openmrs.deltas, load.seed.data,reload.national"/>
+    <target name="deploy.latest" depends="setup,download.latest.national.from.hudson,download.latest.testapp.from.hudson, merge.test.app.to.national.app, undeploy.national, 
+    deploy.national,openmrs.deltas, load.seed.data,reload.national"/>
 </project>
