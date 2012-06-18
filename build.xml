@@ -94,7 +94,7 @@
     <target name="download.latest.national.from.hudson">
         <get dest="${download.dir}/${app.name}.war"
              src="${hudson.ghana.national.url}"/>
-        <echo message="downloaded ghana-national-web-${hudson.ghana.national.release.version}.war from hudson"/>
+        <echo message="downloaded ${app.name}-${hudson.ghana.national.release.version}.war from hudson"/>
     </target>
 
     <target name="download.latest.deliverytools.from.hudson">
@@ -236,12 +236,12 @@
     </target>
 
     <target name="openmrs.deltas">
-        <unzip dest="${download.dir}/ghana-national-web"
-               src="${download.dir}/ghana-national-web.war">
+        <unzip dest="${download.dir}/${app.name}"
+               src="${download.dir}/${app.name}.war">
         </unzip>
         <mkdir dir="../build"/>
         <move todir="../build">
-            <fileset dir="${download.dir}/ghana-national-web/build"/>
+            <fileset dir="${download.dir}/${app.name}/build"/>
         </move>
         <path id="dependencies">
             <fileset dir="./lib/" includes="*.jar"/>
@@ -259,14 +259,7 @@
                 classpathref="dependencies"/>
     </target>
 
-    <target name="load.seed.data">
-        <get dest="${download.dir}/ghana-national-tools.jar"
-             src="${hudson.ghana.national.tools.url}"/>
-        <unzip dest="${download.dir}">
-            <fileset dir="${download.dir}">
-                <include name="ghana-national-tools.jar"/>
-            </fileset>
-        </unzip>
+    <target name="load.seed.data" depends="download.tools.jar">
         <path id="lib.path">
             <fileset dir="${tomcat.home}/webapps/${app.name}/WEB-INF/lib" includes="**/*.jar"/>
             <fileset dir="${tomcat.home}/lib" includes="**/*.jar"/>
@@ -282,7 +275,17 @@
         <echo message="seed data loaded into ${couchdb.national.db} database"/>
     </target>
 
-    <target name="load.audio.files">
+    <target name="download.tools.jar">
+        <get dest="${download.dir}/ghana-national-tools.jar"
+             src="${hudson.ghana.national.tools.url}"/>
+        <unzip dest="${download.dir}">
+            <fileset dir="${download.dir}">
+                <include name="ghana-national-tools.jar"/>
+            </fileset>
+        </unzip>
+    </target>
+
+    <target name="load.audio.files" depends="download.tools.jar">
         <delete dir="audio"/>
         <exec executable="git">
             <arg value="clone"/>
@@ -291,6 +294,21 @@
             <arg value="git@github.com:motech/Ghana-National-Audio.git"/>
             <arg value="audio"/>
         </exec>
+
+        <path id="lib.path">
+            <fileset dir="${tomcat.home}/webapps/${app.name}/WEB-INF/lib" includes="**/*.jar"/>
+            <fileset dir="${tomcat.home}/lib" includes="**/*.jar"/>
+        </path>
+        <echo message="please wait ..."/>
+        <java fork="false" classname="${audio.loading.main.class}">
+            <classpath>
+                <path location="${tomcat.home}/webapps/${app.name}/WEB-INF/classes"/>
+                <path location="${download.dir}"/>
+                <path refid="lib.path"/>
+            </classpath>
+        </java>
+        <echo message="seed data loaded into ${couchdb.national.db} database"/>
+
     </target>
 
     <target name="drop.motechmodule.databases">
@@ -333,14 +351,7 @@
         <echo message="dropped motechmodule tables from openmrs database ${mysql.openmrs.db.name} in ${mysql.server}"/>
     </target>
 
-    <target name="migrate.schedule.data">
-        <get dest="${download.dir}/ghana-national-tools-1.0-SNAPSHOT.jar"
-             src="${hudson.ghana.national.tools.url}"/>
-        <unzip dest="${download.dir}/ghana-national-tools-1.0-SNAPSHOT">
-            <fileset dir="${download.dir}">
-                <include name="ghana-national-tools-1.0-SNAPSHOT.jar"/>
-            </fileset>
-        </unzip>
+    <target name="migrate.schedule.data" depends="download.tools.jar">
         <path id="lib.path">
             <fileset dir="${tomcat.home}/webapps/${app.name}/WEB-INF/lib" includes="**/*.jar"/>
             <fileset dir="${tomcat.home}/lib" includes="**/*.jar"/>
@@ -385,20 +396,13 @@
             </fileset>
         </move>
 
-        <copy tofile="${openmrs.directory}/reports/1.rptdesign"
-              file="${download.dir}/reports/child-health-return.rptdesign"/>
-        <copy tofile="${openmrs.directory}/reports/2.rptdesign"
-              file="${download.dir}/reports/communicable-disease-surveillance.rptdesign"/>
-        <copy tofile="${openmrs.directory}/reports/3.rptdesign"
-              file="${download.dir}/reports/immunization-returns.rptdesign"/>
-        <copy tofile="${openmrs.directory}/reports/4.rptdesign"
-              file="${download.dir}/reports/malaria.rptdesign"/>
-        <copy tofile="${openmrs.directory}/reports/5.rptdesign"
-              file="${download.dir}/reports/mid-wife.rptdesign"/>
-        <copy tofile="${openmrs.directory}/reports/6.rptdesign"
-              file="${download.dir}/reports/opd-morbidity.rptdesign"/>
-        <copy tofile="${openmrs.directory}/reports/7.rptdesign"
-              file="${download.dir}/reports/opd-statement.rptdesign"/>
+        <copy tofile="${openmrs.directory}/reports/1.rptdesign" file="${download.dir}/reports/child-health-return.rptdesign"/>
+        <copy tofile="${openmrs.directory}/reports/2.rptdesign" file="${download.dir}/reports/communicable-disease-surveillance.rptdesign"/>
+        <copy tofile="${openmrs.directory}/reports/3.rptdesign" file="${download.dir}/reports/immunization-returns.rptdesign"/>
+        <copy tofile="${openmrs.directory}/reports/4.rptdesign" file="${download.dir}/reports/malaria.rptdesign"/>
+        <copy tofile="${openmrs.directory}/reports/5.rptdesign" file="${download.dir}/reports/mid-wife.rptdesign"/>
+        <copy tofile="${openmrs.directory}/reports/6.rptdesign" file="${download.dir}/reports/opd-morbidity.rptdesign"/>
+        <copy tofile="${openmrs.directory}/reports/7.rptdesign" file="${download.dir}/reports/opd-statement.rptdesign"/>
     </target>
 
     <target name="deploy.idgen.omod">
@@ -420,8 +424,7 @@
         <delete dir="${openmrs.directory}"/>
         <mkdir dir="${openmrs.directory}"/>
         <mkdir dir="${openmrs.directory}/modules"/>
-        <copy file="${download.dir}/openmrs-data/openmrs-runtime.properties"
-              tofile="${openmrs.directory}/openmrs-runtime.properties"/>
+        <copy file="${download.dir}/openmrs-data/openmrs-runtime.properties" tofile="${openmrs.directory}/openmrs-runtime.properties"/>
         <copy todir="${openmrs.directory}/modules">
             <fileset dir="${download.dir}/openmrs-data/modules">
                 <include name="**/*.omod"/>
