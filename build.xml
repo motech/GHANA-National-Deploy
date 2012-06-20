@@ -221,7 +221,7 @@
     <target name="openmrs.quartz">
         <sql driver="${mysql.driver}" url="jdbc:mysql://${mysql.server}:${mysql.port}?autoReconnect=true" userid="${mysql.user}" classpathref="mysql.classpath" password="${mysql.password}">
             <fileset dir="${basedir}/artifacts/sql/ghana">
-                <include name="create_db_schema_quartz_v1.8.sql"/>
+                <include name="create_db_schema_quartz_v2.1.sql"/>
             </fileset>
         </sql>
         <echo message="creation of ${mysql.quartz.db.name} db successful."/>
