@@ -21,12 +21,6 @@
     </condition>
 
     <taskdef name="deploy" classname="org.apache.catalina.ant.DeployTask" classpathref="tomcat.classpath"/>
-    <taskdef name="list" classname="org.apache.catalina.ant.ListTask" classpathref="tomcat.classpath"/>
-    <taskdef name="reload" classname="org.apache.catalina.ant.ReloadTask" classpathref="tomcat.classpath"/>
-    <taskdef name="findleaks" classname="org.apache.catalina.ant.FindLeaksTask" classpathref="tomcat.classpath"/>
-    <taskdef name="resources" classname="org.apache.catalina.ant.ResourcesTask" classpathref="tomcat.classpath"/>
-    <taskdef name="start" classname="org.apache.catalina.ant.StartTask" classpathref="tomcat.classpath"/>
-    <taskdef name="stop" classname="org.apache.catalina.ant.StopTask" classpathref="tomcat.classpath"/>
     <taskdef name="undeploy" classname="org.apache.catalina.ant.UndeployTask" classpathref="tomcat.classpath"/>
 
     <target name="deploy.national" description="Install">
@@ -44,25 +38,6 @@
                 path="/deliverytools" war="file:${download.dir}/deliverytools.war"/>
     </target>
 
-    <target name="deploy.gn.testapp" description="Install">
-        <deploy url="${tomcat.manager.url}" username="${tomcat.user}" password="${tomcat.password}"
-                path="/ghana-national-test" war="file:${download.dir}/ghana-national-test.war"/>
-    </target>
-
-    <target name="reload.national" description="Reload">
-        <reload url="${tomcat.manager.url}" username="${tomcat.user}" password="${tomcat.password}"
-                path="/${app.name}"/>
-    </target>
-
-    <target name="reload.openmrs" description="Reload">
-        <reload url="${tomcat.manager.url}" username="${tomcat.user}" password="${tomcat.password}" path="/openmrs"/>
-    </target>
-
-    <target name="reload.deliverytools" description="Reload">
-        <reload url="${tomcat.manager.url}" username="${tomcat.user}" password="${tomcat.password}"
-                path="/deliverytools"/>
-    </target>
-
     <target name="undeploy.national" description="Remove">
         <undeploy url="${tomcat.manager.url}" failonerror="false" username="${tomcat.user}"
                   password="${tomcat.password}" path="/${app.name}"/>
@@ -76,11 +51,6 @@
     <target name="undeploy.deliverytools" description="Remove">
         <undeploy url="${tomcat.manager.url}" failonerror="false" username="${tomcat.user}"
                   password="${tomcat.password}" path="/deliverytools"/>
-    </target>
-
-    <target name="undeploy.gn.testapp" description="Remove">
-        <undeploy url="${tomcat.manager.url}" failonerror="false" username="${tomcat.user}"
-                  password="${tomcat.password}" path="/ghana-national-test"/>
     </target>
 
     <!-- TOMCAT TASKS /END/-->
@@ -174,23 +144,7 @@
         <echo message="dropped data from couchdb in ${couchdb.server}"/>
     </target>
 
-    <target name="load.openmrs.schema">
-        <sql driver="${mysql.driver}"
-             url="jdbc:mysql://${mysql.server}:${mysql.port}?autoReconnect=true"
-             userid="${mysql.user}"
-             classpathref="mysql.classpath"
-             password="${mysql.password}">
-            drop database if exists ${mysql.openmrs.db.name};
-            create database ${mysql.openmrs.db.name} default charset utf8;
-            grant all on ${mysql.openmrs.db.name}.* to '${mysql.openmrs.user}'@'localhost' identified by
-            '${mysql.openmrs.password}';
-            grant all on ${mysql.openmrs.db.name}.* to '${mysql.openmrs.user}'@'%' identified by
-            '${mysql.openmrs.password}';
-            flush privileges;
-        </sql>
-    </target>
-
-    <target name="load.migrated.openmrs.schema">
+    <target name="openmrs.db.migrate">
         <sql driver="${mysql.driver}" url="jdbc:mysql://${mysql.server}:${mysql.port}?autoReconnect=true" userid="${mysql.user}" classpathref="mysql.classpath" password="${mysql.password}">
             drop database if exists ${mysql.openmrs.db.name};
             create database ${mysql.openmrs.db.name} default charset utf8;
@@ -207,18 +161,18 @@
             <arg value="${mysql.user}"/>
             <arg value="${mysql.password}"/>
             <arg value="${mysql.openmrs.db.name}"/>
-            <arg value="${basedir}\artifacts\sql\ghana\0.openmrs.1.8.migrated.sql"/>
+            <arg value="${basedir}\artifacts\sql\ghana\openmrs.1.8.migrated.sql"/>
         </exec>
         <exec executable="${basedir}/artifacts/sql/ghana/load_schema.sh" osfamily="unix">
             <arg value="${mysql.user}"/>
             <arg value="${mysql.password}"/>
             <arg value="${mysql.openmrs.db.name}"/>
-            <arg value="${basedir}/artifacts/sql/ghana/0.openmrs.1.8.migrated.sql"/>
+            <arg value="${basedir}/artifacts/sql/ghana/openmrs.1.8.migrated.sql"/>
         </exec>
         <echo message="recreated schema for ${mysql.openmrs.db.name}"/>
     </target>
 
-    <target name="openmrs.quartz">
+    <target name="quartz.db.setup">
         <sql driver="${mysql.driver}" url="jdbc:mysql://${mysql.server}:${mysql.port}?autoReconnect=true" userid="${mysql.user}" classpathref="mysql.classpath" password="${mysql.password}">
             <fileset dir="${basedir}/artifacts/sql/ghana">
                 <include name="create_db_schema_quartz_v2.1.sql"/>
@@ -227,7 +181,7 @@
         <echo message="creation of ${mysql.quartz.db.name} db successful."/>
     </target>
 
-    <target name="aggregator.setup">
+    <target name="aggregator.db.setup">
         <sql driver="${mysql.driver}" url="jdbc:mysql://${mysql.server}:${mysql.port}?autoReconnect=true" userid="${mysql.user}" classpathref="mysql.classpath" password="${mysql.password}">
             <fileset dir="${basedir}/artifacts/sql/ghana">
                 <include name="aggregator_database_and_tables.sql"/>
@@ -235,7 +189,25 @@
         </sql>
     </target>
 
-    <target name="openmrs.deltas">
+    <target name="openmrs.db.create">
+        <!-- drop existing schema -->
+        <sql driver="${mysql.driver}"
+             url="jdbc:mysql://${mysql.server}:${mysql.port}?autoReconnect=true"
+             userid="${mysql.user}"
+             classpathref="mysql.classpath"
+             password="${mysql.password}">
+            drop database if exists ${mysql.openmrs.db.name};
+            create database ${mysql.openmrs.db.name} default charset utf8;
+            grant all on ${mysql.openmrs.db.name}.* to '${mysql.openmrs.user}'@'localhost' identified by
+            '${mysql.openmrs.password}';
+            grant all on ${mysql.openmrs.db.name}.* to '${mysql.openmrs.user}'@'%' identified by
+            '${mysql.openmrs.password}';
+            flush privileges;
+        </sql>
+    </target>
+
+    <target name="openmrs.db.deltas">
+        <!-- run changelog -->
         <unzip dest="${download.dir}/${app.name}"
                src="${download.dir}/${app.name}.war">
         </unzip>
@@ -305,39 +277,12 @@
 
     </target>
 
-    <target name="drop.motechmodule.databases">
+    <target name="drop.motechmodule.tables">
         <sql driver="${mysql.driver}" url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.openmrs.db.name}?autoReconnect=true" userid="${mysql.user}" classpathref="mysql.classpath"
              password="${mysql.password}">
-            use ${mysql.openmrs.db.name};
-            drop table if exists `motechmodule_blackout`;
-            drop table if exists `motechmodule_community_patient`;
-            drop table if exists `motechmodule_configuration`;
-            drop table if exists `motechmodule_defaulted_expected_encounter_alert`;
-            drop table if exists `motechmodule_defaulted_expected_obs_alert`;
-            drop table if exists `motechmodule_expected_care_message_detail_attribute`;
-            drop table if exists `motechmodule_expected_encounter`;
-            drop table if exists `motechmodule_expected_obs`;
-            drop table if exists `motechmodule_facility_patient`;
-            drop table if exists `motechmodule_incoming_message`;
-            drop table if exists `motechmodule_message`;
-            drop table if exists `motechmodule_message_language`;
-            drop table if exists `motechmodule_message_program`;
-            drop table if exists `motechmodule_message_program_state_transition`;
-            drop table if exists `motechmodule_messagedefinition_attribute`;
-            drop table if exists `motechmodule_rct_assignment`;
-            drop table if exists `motechmodule_rct_patient`;
-            drop table if exists `motechmodule_rct_stratum`;
-            drop table if exists `motechmodule_scheduledmessage`;
-            drop table if exists `motechmodule_troubledphone`;
-            drop table if exists `motechmodule_url`;
-            drop table if exists `motechmodule_user_type`;
-            drop table if exists `motechmodule_care_configuration`;
-            drop table if exists `motechmodule_community`;
-            drop table if exists `motechmodule_enrollment`;
-            drop table if exists `motechmodule_expected_care_message_detail`;
-            drop table if exists `motechmodule_message_program_state`;
-            drop table if exists `motechmodule_messagedefinition`;
-            drop table if exists `motechmodule_rct_facility`;
+            <fileset dir="${basedir}/artifacts/sql/ghana">
+                <include name="clear_motechmodule_tables.sql"/>
+            </fileset>
         </sql>
         <echo message="dropped motechmodule tables from openmrs database ${mysql.openmrs.db.name} in ${mysql.server}"/>
     </target>
@@ -359,11 +304,11 @@
     </target>
 
     <target name="deploy.reports">
-        <!--<replace file="${basedir}/artifacts/sql/ghana/birt.sql" token="@OPENMRS@" value="${openmrs.directory}"/>-->
+        <replace file="${basedir}/artifacts/sql/ghana/birt.sql" token="@OPENMRS@" value="${openmrs.directory}"/>
         <sql driver="${mysql.driver}" url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.openmrs.db.name}?autoReconnect=true" userid="${mysql.user}" classpathref="mysql.classpath"
              password="${mysql.password}">
             <fileset dir="${basedir}/artifacts/sql/ghana">
-                <!--<include name="birt.sql"/>-->
+                <include name="birt.sql"/>
                 <include name="reports.sql"/>
             </fileset>
         </sql>
@@ -393,12 +338,7 @@
         <copy tofile="${openmrs.directory}/reports/7.rptdesign" file="${download.dir}/reports/opd-statement.rptdesign"/>
     </target>
 
-    <target name="deploy.idgen.omod">
-        <get dest="${download.dir}/idgen-omod.omod" src="http://nexus.motechproject.org/content/repositories/snapshots/org/motechproject/idgen-omod/1.0-SNAPSHOT/idgen-omod-1.0-SNAPSHOT.jar"/>
-        <copy file="${download.dir}/idgen-omod.omod" tofile="${openmrs.directory}/modules/idgen-omod.omod"/>
-    </target>
-
-    <target name="download.openmrs">
+    <target name="openmrs.omod.setup">
         <get dest="${download.dir}/ghana-national-common-1.0-SNAPSHOT-resources.zip"
              src="http://nexus.motechproject.org/content/repositories/snapshots/org/motechproject/ghana-national-common/1.0-SNAPSHOT/ghana-national-common-1.0-SNAPSHOT-resources.zip"/>
 
@@ -417,16 +357,39 @@
                 <include name="**/*.omod"/>
             </fileset>
         </copy>
+
+        <get dest="${download.dir}/idgen-omod.omod" src="http://nexus.motechproject.org/content/repositories/snapshots/org/motechproject/idgen-omod/1.0-SNAPSHOT/idgen-omod-1.0-SNAPSHOT.jar"/>
+        <copy file="${download.dir}/idgen-omod.omod" tofile="${openmrs.directory}/modules/idgen-omod.omod"/>
     </target>
 
-    <target name="init.migrated" depends="setup, drop.national.db, load.migrated.openmrs.schema, openmrs.quartz, deploy.reports, download.openmrs, undeploy.openmrs, deploy.openmrs, deploy.idgen.omod, 
-    download.latest.national.from.hudson, download.latest.testapp.from.hudson, merge.test.app.to.national.app, undeploy.national, deploy.national, download.latest.deliverytools.from.hudson, 
-    undeploy.deliverytools, deploy.deliverytools, load.seed.data, reload.national"/>
+    <target name="openmrs.data.migrate" depends="openmrs.db.migrate, openmrs.db.deltas"/>
+    <target name="openmrs.db.setup" depends="openmrs.db.create, openmrs.db.deltas"/>
+    <target name="redeploy.openmrs" depends="openmrs.omod.setup, deploy.reports, undeploy.openmrs, deploy.openmrs"/>
+    <target name="redeploy.ghana.national" depends="download.latest.national.from.hudson, download.latest.testapp.from.hudson, merge.test.app.to.national.app, undeploy.national, deploy.national, load.seed.data"/>
+    <target name="redeploy.delivery.tools" depends="download.latest.deliverytools.from.hudson, undeploy.deliverytools, deploy.deliverytools"/>
 
-    <target name="init" depends="setup, drop.national.db, load.openmrs.schema, openmrs.quartz, download.openmrs, undeploy.openmrs, deploy.openmrs, download.latest.national.from.hudson, 
-    download.latest.testapp.from.hudson, merge.test.app.to.national.app, undeploy.national, deploy.national, download.latest.deliverytools.from.hudson, undeploy.deliverytools, deploy.deliverytools, 
-    openmrs.deltas, deploy.reports, deploy.idgen.omod, load.seed.data, reload.national"/>
+    <target name="init.migrated" depends="setup,
+                                          drop.national.db,
+                                          openmrs.db.migrate,
+                                          aggregator.db.setup,
+                                          quartz.db.setup,
+                                          redeploy.openmrs,
+                                          redeploy.delivery.tools,
+                                          redeploy.ghana.national,
+                                          migrate.schedule.data,
+                                          drop.motechmodule.tables"/>
 
-    <target name="deploy.latest" depends="setup,download.latest.national.from.hudson,download.latest.testapp.from.hudson, merge.test.app.to.national.app, undeploy.national, 
-    deploy.national,openmrs.deltas, load.seed.data,reload.national"/>
+    <target name="init" depends="setup,
+                                 drop.national.db,
+                                 openmrs.db.setup,
+                                 aggregator.db.setup,
+                                 quartz.db.setup,
+                                 redeploy.openmrs,
+                                 redeploy.delivery.tools,
+                                 redeploy.ghana.national,
+                                 drop.motechmodule.tables"/>
+
+    <target name="quick.deploy" depends="setup,
+                                         openmrs.db.deltas,
+                                         redeploy.ghana.national"/>
 </project>
