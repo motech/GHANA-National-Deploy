@@ -359,11 +359,11 @@
     </target>
 
     <target name="deploy.reports">
-        <replace file="${basedir}/artifacts/sql/ghana/birt.sql" token="@OPENMRS@" value="${openmrs.directory}"/>
+        <!--<replace file="${basedir}/artifacts/sql/ghana/birt.sql" token="@OPENMRS@" value="${openmrs.directory}"/>-->
         <sql driver="${mysql.driver}" url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.openmrs.db.name}?autoReconnect=true" userid="${mysql.user}" classpathref="mysql.classpath"
              password="${mysql.password}">
             <fileset dir="${basedir}/artifacts/sql/ghana">
-                <include name="birt.sql"/>
+                <!--<include name="birt.sql"/>-->
                 <include name="reports.sql"/>
             </fileset>
         </sql>
