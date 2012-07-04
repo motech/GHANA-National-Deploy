@@ -206,7 +206,7 @@
         </sql>
     </target>
 
-    <target name="openmrs.db.deltas">
+    <target name="openmrs.db.deltas" depends="download.latest.national.from.hudson">
         <!-- run changelog -->
         <unzip dest="${download.dir}/${app.name}"
                src="${download.dir}/${app.name}.war">
