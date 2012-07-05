@@ -376,7 +376,7 @@
 
     <target name="init.migrated" depends="setup,
                                           drop.national.db,
-                                          openmrs.db.migrate,
+                                          openmrs.data.migrate,
                                           aggregator.db.setup,
                                           quartz.db.setup,
                                           redeploy.openmrs,
