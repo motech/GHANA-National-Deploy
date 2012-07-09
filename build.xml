@@ -188,7 +188,7 @@
         </sql>
     </target>
 
-    <target name="openmrs.db.create" depends="download.latest.national.from.hudson">
+    <target name="openmrs.db.create" depends="unzip.ghana.national">
         <!-- drop existing schema -->
         <sql driver="${mysql.driver}"
              url="jdbc:mysql://${mysql.server}:${mysql.port}?autoReconnect=true"
@@ -203,13 +203,6 @@
             '${mysql.openmrs.password}';
             flush privileges;
         </sql>
-        <unzip dest="${download.dir}/${app.name}"
-               src="${download.dir}/${app.name}.war">
-        </unzip>
-        <mkdir dir="../build"/>
-        <move todir="../build">
-            <fileset dir="${download.dir}/${app.name}/build"/>
-        </move>
         <sql driver="${mysql.driver}" url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.openmrs.db.name}?autoReconnect=true" userid="${mysql.user}" classpathref="mysql.classpath"
              password="${mysql.password}">
             <fileset dir="../build/sql">
@@ -218,7 +211,17 @@
         </sql>
     </target>
 
-    <target name="openmrs.db.deltas" depends="download.latest.national.from.hudson">
+    <target name="unzip.ghana.national" depends="download.latest.national.from.hudson">
+        <unzip dest="${download.dir}/${app.name}"
+               src="${download.dir}/${app.name}.war">
+        </unzip>
+        <mkdir dir="../build"/>
+        <move todir="../build">
+            <fileset dir="${download.dir}/${app.name}/build"/>
+        </move>
+    </target>
+
+    <target name="openmrs.db.deltas" depends="unzip.ghana.national">
         <!-- run changelog -->
         <path id="dependencies">
             <fileset dir="./lib/" includes="*.jar"/>
