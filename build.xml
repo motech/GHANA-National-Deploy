@@ -62,21 +62,21 @@
 
     <target name="download.latest.national.from.hudson">
         <get dest="${download.dir}/${app.name}.war"
-             src="${hudson.ghana.national.url}"/>
-        <echo message="downloaded ${app.name}-${hudson.ghana.national.release.version}.war from hudson"/>
+             src="${ghana.national.url}"/>
+        <echo message="downloaded ${app.name}-${ghana.national.release.version}.war from hudson"/>
     </target>
 
     <target name="download.latest.deliverytools.from.hudson">
         <get dest="${download.dir}/deliverytools.war"
-             src="${hudson.delivery.tools.url}"/>
-        <echo message="downloaded ghana-deliverytools-web-${hudson.delivery.tools.release.version}.war from hudson"/>
+             src="${delivery.tools.url}"/>
+        <echo message="downloaded ghana-deliverytools-web-${delivery.tools.release.version}.war from hudson"/>
     </target>
 
 
     <target name="download.latest.testapp.from.hudson">
         <get dest="${download.dir}/ghana-national-test.war"
-             src="${hudson.ghana.national.test.url}"/>
-        <echo message="downloaded ghana-national-test-${hudson.ghana.national.release.version}.war from hudson"/>
+             src="${ghana.national.test.url}"/>
+        <echo message="downloaded ghana-national-test-${ghana.national.release.version}.war from hudson"/>
     </target>
 
     <target name="merge.test.app.to.national.app">
@@ -174,7 +174,7 @@
     <target name="quartz.db.setup">
         <sql driver="${mysql.driver}" url="jdbc:mysql://${mysql.server}:${mysql.port}?autoReconnect=true" userid="${mysql.user}" classpathref="mysql.classpath" password="${mysql.password}">
             <fileset dir="${basedir}/artifacts/sql/ghana">
-                <include name="create_db_schema_quartz_v2.1.sql"/>
+                <include name="../build/sql/quartz_database_setup.sql"/>
             </fileset>
         </sql>
         <echo message="creation of ${mysql.quartz.db.name} db successful."/>
@@ -183,7 +183,7 @@
     <target name="aggregator.db.setup">
         <sql driver="${mysql.driver}" url="jdbc:mysql://${mysql.server}:${mysql.port}?autoReconnect=true" userid="${mysql.user}" classpathref="mysql.classpath" password="${mysql.password}">
             <fileset dir="${basedir}/artifacts/sql/ghana">
-                <include name="aggregator_database_and_tables.sql"/>
+                <include name="../build/sql/aggregator_database_setup.sql"/>
             </fileset>
         </sql>
     </target>
@@ -251,7 +251,7 @@
 
     <target name="download.tools.jar">
         <get dest="${download.dir}/${ghana.national.tools.name}.jar"
-             src="${hudson.ghana.national.tools.url}"/>
+             src="${ghana.national.tools.url}"/>
         <unzip dest="${download.dir}">
             <fileset dir="${download.dir}">
                 <include name="${ghana.national.tools.name}.jar"/>
@@ -259,7 +259,7 @@
         </unzip>
     </target>
 
-    <target name="load.audio.files" depends="download.tools.jar">
+    <target name="load.audio.files" depends="download.tools.jar,unzip.ghana.national">
         <delete dir="audio"/>
         <exec executable="git">
             <arg value="clone"/>
@@ -348,7 +348,7 @@
 
     <target name="openmrs.omod.setup">
         <get dest="${download.dir}/ghana-national-common-1.0-SNAPSHOT-resources.zip"
-             src="http://nexus.motechproject.org/content/repositories/snapshots/org/motechproject/ghana-national-common/1.0-SNAPSHOT/ghana-national-common-1.0-SNAPSHOT-resources.zip"/>
+             src="${ghana.national.commons.url}"/>
 
         <unzip dest="${download.dir}">
             <fileset dir="${download.dir}">
@@ -366,7 +366,7 @@
             </fileset>
         </copy>
 
-        <get dest="${download.dir}/idgen-omod.omod" src="http://nexus.motechproject.org/content/repositories/snapshots/org/motechproject/idgen-omod/1.0-SNAPSHOT/idgen-omod-1.0-SNAPSHOT.jar"/>
+        <get dest="${download.dir}/idgen-omod.omod" src="${idgen.url}"/>
         <copy file="${download.dir}/idgen-omod.omod" tofile="${openmrs.directory}/modules/idgen-omod.omod"/>
     </target>
 
