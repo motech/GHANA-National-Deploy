@@ -144,7 +144,8 @@
     </target>
 
     <target name="openmrs.db.migrate">
-        <sql driver="${mysql.driver}" url="jdbc:mysql://${mysql.server}:${mysql.port}?autoReconnect=true" userid="${mysql.user}" classpathref="mysql.classpath" password="${mysql.password}">
+        <sql driver="${mysql.driver}" url="jdbc:mysql://${mysql.server}:${mysql.port}?autoReconnect=true"
+             userid="${mysql.user}" classpathref="mysql.classpath" password="${mysql.password}">
             drop database if exists ${mysql.openmrs.db.name};
             create database ${mysql.openmrs.db.name} default charset utf8;
             grant all on ${mysql.openmrs.db.name}.* to '${mysql.openmrs.user}'@'localhost' identified by
@@ -172,7 +173,14 @@
     </target>
 
     <target name="quartz.db.setup">
-        <sql driver="${mysql.driver}" url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.quartz.db.name}?autoReconnect=true" userid="${mysql.user}" classpathref="mysql.classpath" password="${mysql.password}">
+        <sql driver="${mysql.driver}" url="jdbc:mysql://${mysql.server}:${mysql.port}?autoReconnect=true"
+             userid="${mysql.user}" classpathref="mysql.classpath" password="${mysql.password}">
+            drop database if exists ${mysql.quartz.db.name};
+            create database ${mysql.quartz.db.name} default charset utf8;
+        </sql>
+        <sql driver="${mysql.driver}"
+             url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.quartz.db.name}?autoReconnect=true"
+             userid="${mysql.user}" classpathref="mysql.classpath" password="${mysql.password}">
             <fileset dir="${basedir}/artifacts/sql/ghana">
                 <include name="../build/sql/quartz_database_setup.sql"/>
             </fileset>
@@ -181,7 +189,14 @@
     </target>
 
     <target name="aggregator.db.setup">
-        <sql driver="${mysql.driver}" url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.aggregator.db.name}?autoReconnect=true" userid="${mysql.user}" classpathref="mysql.classpath" password="${mysql.password}">
+        <sql driver="${mysql.driver}" url="jdbc:mysql://${mysql.server}:${mysql.port}?autoReconnect=true"
+             userid="${mysql.user}" classpathref="mysql.classpath" password="${mysql.password}">
+            drop database if exists ${mysql.aggregator.db.name};
+            create database ${mysql.aggregator.db.name} default charset utf8;
+        </sql>
+        <sql driver="${mysql.driver}"
+             url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.aggregator.db.name}?autoReconnect=true"
+             userid="${mysql.user}" classpathref="mysql.classpath" password="${mysql.password}">
             <fileset dir="${basedir}/artifacts/sql/ghana">
                 <include name="../build/sql/aggregator_database_setup.sql"/>
             </fileset>
@@ -203,7 +218,9 @@
             '${mysql.openmrs.password}';
             flush privileges;
         </sql>
-        <sql driver="${mysql.driver}" url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.openmrs.db.name}?autoReconnect=true" userid="${mysql.user}" classpathref="mysql.classpath"
+        <sql driver="${mysql.driver}"
+             url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.openmrs.db.name}?autoReconnect=true"
+             userid="${mysql.user}" classpathref="mysql.classpath"
              password="${mysql.password}">
             <fileset dir="../build/sql">
                 <include name="0.openmrs-1.8.sql"/>
@@ -229,7 +246,8 @@
         <taskdef resource="liquibasetasks.properties">
             <classpath refid="dependencies"/>
         </taskdef>
-        <updateDatabase changeLogFile="../build/sql/master.xml" driver="${mysql.driver}" url="${mysql.url}" username="${mysql.user}" password="${mysql.password}" dropFirst="false"
+        <updateDatabase changeLogFile="../build/sql/master.xml" driver="${mysql.driver}" url="${mysql.url}"
+                        username="${mysql.user}" password="${mysql.password}" dropFirst="false"
                         classpathref="dependencies"/>
     </target>
 
@@ -286,7 +304,9 @@
     </target>
 
     <target name="drop.motechmodule.tables">
-        <sql driver="${mysql.driver}" url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.openmrs.db.name}?autoReconnect=true" userid="${mysql.user}" classpathref="mysql.classpath"
+        <sql driver="${mysql.driver}"
+             url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.openmrs.db.name}?autoReconnect=true"
+             userid="${mysql.user}" classpathref="mysql.classpath"
              password="${mysql.password}">
             <fileset dir="${basedir}/artifacts/sql/ghana">
                 <include name="clear_motechmodule_tables.sql"/>
@@ -313,7 +333,9 @@
 
     <target name="deploy.reports">
         <replace file="${basedir}/artifacts/sql/ghana/birt.sql" token="@OPENMRS@" value="${openmrs.directory}"/>
-        <sql driver="${mysql.driver}" url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.openmrs.db.name}?autoReconnect=true" userid="${mysql.user}" classpathref="mysql.classpath"
+        <sql driver="${mysql.driver}"
+             url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.openmrs.db.name}?autoReconnect=true"
+             userid="${mysql.user}" classpathref="mysql.classpath"
              password="${mysql.password}">
             <fileset dir="${basedir}/artifacts/sql/ghana">
                 <include name="birt.sql"/>
@@ -337,9 +359,12 @@
             </fileset>
         </move>
 
-        <copy tofile="${openmrs.directory}/reports/1.rptdesign" file="${download.dir}/reports/child-health-return.rptdesign"/>
-        <copy tofile="${openmrs.directory}/reports/2.rptdesign" file="${download.dir}/reports/communicable-disease-surveillance.rptdesign"/>
-        <copy tofile="${openmrs.directory}/reports/3.rptdesign" file="${download.dir}/reports/immunization-returns.rptdesign"/>
+        <copy tofile="${openmrs.directory}/reports/1.rptdesign"
+              file="${download.dir}/reports/child-health-return.rptdesign"/>
+        <copy tofile="${openmrs.directory}/reports/2.rptdesign"
+              file="${download.dir}/reports/communicable-disease-surveillance.rptdesign"/>
+        <copy tofile="${openmrs.directory}/reports/3.rptdesign"
+              file="${download.dir}/reports/immunization-returns.rptdesign"/>
         <copy tofile="${openmrs.directory}/reports/4.rptdesign" file="${download.dir}/reports/malaria.rptdesign"/>
         <copy tofile="${openmrs.directory}/reports/5.rptdesign" file="${download.dir}/reports/mid-wife.rptdesign"/>
         <copy tofile="${openmrs.directory}/reports/6.rptdesign" file="${download.dir}/reports/opd-morbidity.rptdesign"/>
@@ -359,7 +384,8 @@
         <delete dir="${openmrs.directory}"/>
         <mkdir dir="${openmrs.directory}"/>
         <mkdir dir="${openmrs.directory}/modules"/>
-        <copy file="${download.dir}/openmrs-data/openmrs-runtime.properties" tofile="${openmrs.directory}/openmrs-runtime.properties"/>
+        <copy file="${download.dir}/openmrs-data/openmrs-runtime.properties"
+              tofile="${openmrs.directory}/openmrs-runtime.properties"/>
         <copy todir="${openmrs.directory}/modules">
             <fileset dir="${download.dir}/openmrs-data/modules">
                 <include name="**/*.omod"/>
@@ -371,7 +397,9 @@
     </target>
 
     <target name="openmrs.data.migrate" depends="openmrs.db.migrate, openmrs.db.deltas">
-        <sql driver="${mysql.driver}" url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.openmrs.db.name}?autoReconnect=true" userid="${mysql.user}" classpathref="mysql.classpath"
+        <sql driver="${mysql.driver}"
+             url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.openmrs.db.name}?autoReconnect=true"
+             userid="${mysql.user}" classpathref="mysql.classpath"
              password="${mysql.password}">
             <fileset dir="${basedir}/artifacts/sql/ghana">
                 <include name="reset_admin_password.sql"/>
@@ -380,8 +408,10 @@
     </target>
     <target name="openmrs.db.setup" depends="openmrs.db.create, openmrs.db.deltas"/>
     <target name="redeploy.openmrs" depends="openmrs.omod.setup, deploy.reports, undeploy.openmrs, deploy.openmrs"/>
-    <target name="redeploy.ghana.national" depends="download.latest.national.from.hudson, download.latest.testapp.from.hudson, merge.test.app.to.national.app, undeploy.national, deploy.national, load.seed.data"/>
-    <target name="redeploy.delivery.tools" depends="download.latest.deliverytools.from.hudson, undeploy.deliverytools, deploy.deliverytools"/>
+    <target name="redeploy.ghana.national"
+            depends="download.latest.national.from.hudson, download.latest.testapp.from.hudson, merge.test.app.to.national.app, undeploy.national, deploy.national, load.seed.data"/>
+    <target name="redeploy.delivery.tools"
+            depends="download.latest.deliverytools.from.hudson, undeploy.deliverytools, deploy.deliverytools"/>
 
     <target name="init.migrated" depends="setup,
                                           drop.national.db,
