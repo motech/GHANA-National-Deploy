@@ -181,8 +181,8 @@
         <sql driver="${mysql.driver}"
              url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.quartz.db.name}?autoReconnect=true"
              userid="${mysql.user}" classpathref="mysql.classpath" password="${mysql.password}">
-            <fileset dir="${basedir}/artifacts/sql/ghana">
-                <include name="../build/sql/quartz_database_setup.sql"/>
+            <fileset dir="../build/sql">
+                <include name="quartz_database_setup.sql"/>
             </fileset>
         </sql>
         <echo message="creation of ${mysql.quartz.db.name} db successful."/>
@@ -197,8 +197,8 @@
         <sql driver="${mysql.driver}"
              url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.aggregator.db.name}?autoReconnect=true"
              userid="${mysql.user}" classpathref="mysql.classpath" password="${mysql.password}">
-            <fileset dir="${basedir}/artifacts/sql/ghana">
-                <include name="../build/sql/aggregator_database_setup.sql"/>
+            <fileset dir="../build/sql">
+                <include name="aggregator_database_setup.sql"/>
             </fileset>
         </sql>
     </target>
