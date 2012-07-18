@@ -97,6 +97,23 @@
         </zip>
     </target>
 
+    <target name="merge.configuration.files">
+        <delete dir="${download.dir}/app_merge"/>
+        <mkdir dir="${download.dir}/app_merge"/>
+        <unzip dest="${download.dir}/app_merge">
+            <fileset dir="${download.dir}">
+                <include name="${app.name}.war"/>
+            </fileset>
+        </unzip>
+
+        <copy todir="${download.dir}/app_merge/WEB-INF/classes" overwrite="true">
+            <fileset dir="${basedir}/artifacts/properties/${env}">
+                <exclude name="deploy.properties"/>
+            </fileset>
+        </copy>
+        <zip destfile="${download.dir}/${app.name}.war" basedir="${download.dir}/app_merge"/>
+    </target>
+
     <target name="drop.national.db">
         <exec executable="curl">
             <arg value="-s"/>
@@ -415,8 +432,13 @@
     </target>
     <target name="openmrs.db.setup" depends="openmrs.db.create, openmrs.db.deltas"/>
     <target name="redeploy.openmrs" depends="openmrs.omod.setup, deploy.reports, undeploy.openmrs, deploy.openmrs"/>
-    <target name="redeploy.ghana.national"
-            depends="download.latest.national.from.hudson, download.latest.testapp.from.hudson, merge.test.app.to.national.app, undeploy.national, deploy.national, load.seed.data"/>
+    <target name="redeploy.ghana.national" depends="download.latest.national.from.hudson,
+                                                    download.latest.testapp.from.hudson,
+                                                    merge.test.app.to.national.app,
+                                                    merge.configuration.files,
+                                                    undeploy.national,
+                                                    deploy.national,
+                                                    load.seed.data"/>
     <target name="redeploy.delivery.tools"
             depends="download.latest.deliverytools.from.hudson, undeploy.deliverytools, deploy.deliverytools"/>
 
