@@ -140,6 +140,13 @@
             <arg value="DELETE"/>
             <arg value="http://${couchdb.server}:${couchdb.port}/${couchdb.cms.db}"/>
         </exec>
+        <exec executable="curl">
+            <arg value="-s"/>
+            <arg value="-S"/>
+            <arg value="-X"/>
+            <arg value="DELETE"/>
+            <arg value="http://${couchdb.server}:${couchdb.port}/${couchdb.outbox.db}"/>
+        </exec>
         <echo message="dropped data from couchdb in ${couchdb.server}"/>
     </target>
 
