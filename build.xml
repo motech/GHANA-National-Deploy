@@ -97,7 +97,7 @@
         </zip>
     </target>
 
-    <target name="merge.configuration.files">
+    <target name="merge.configuration.files" depends="download.latest.national.from.hudson">
         <delete dir="${download.dir}/app_merge"/>
         <mkdir dir="${download.dir}/app_merge"/>
         <unzip dest="${download.dir}/app_merge">
@@ -358,13 +358,13 @@
     <target name="deploy.reports">
         <replace file="${basedir}/artifacts/sql/ghana/birt.sql" token="@OPENMRS@" value="${openmrs.directory}"/>
         <sql driver="${mysql.driver}"
-             url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.openmrs.db.name}?autoReconnect=true"
-             userid="${mysql.user}" classpathref="mysql.classpath"
-             password="${mysql.password}">
-            <fileset dir="${basedir}/artifacts/sql/ghana">
-                <include name="birt.sql"/>
-                <include name="reports.sql"/>
-            </fileset>
+        url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.openmrs.db.name}?autoReconnect=true"
+        userid="${mysql.user}" classpathref="mysql.classpath"
+        password="${mysql.password}">
+        <fileset dir="${basedir}/artifacts/sql/ghana">
+        <include name="birt.sql"/>
+        <include name="reports.sql"/>
+        </fileset>
         </sql>
 
         <delete dir="${openmrs.directory}/reports"/>
@@ -375,7 +375,12 @@
         <mkdir dir="${openmrs.directory}/reports/datasets"/>
         <get dest="${download.dir}/reports.zip" src="https://github.com/motech/Ghana-Reports/zipball/master"/>
 
-        <unzip dest="${download.dir}/reports" src="${download.dir}/reports.zip"/>
+        <!--<unzip dest="${download.dir}/reports" src="${download.dir}/reports.zip"/>-->
+
+        <replace dir="${download.dir}/reports" value="${reports.db.host}" token="localhost"/>
+        <replace dir="${download.dir}/reports" value="${reports.db.name}" token="openmrs_test"/>
+        <replace dir="${download.dir}/reports" value="${reports.db.password}" token="cGFzc3dvcmQ="/>
+        <replace dir="${download.dir}/reports" value="${reports.db.username}" token="root"/>
 
         <move todir="${download.dir}/reports" flatten="true">
             <fileset dir="${download.dir}/reports">
