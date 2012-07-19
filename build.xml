@@ -375,7 +375,7 @@
         <mkdir dir="${openmrs.directory}/reports/datasets"/>
         <get dest="${download.dir}/reports.zip" src="https://github.com/motech/Ghana-Reports/zipball/master"/>
 
-        <!--<unzip dest="${download.dir}/reports" src="${download.dir}/reports.zip"/>-->
+        <unzip dest="${download.dir}/reports" src="${download.dir}/reports.zip"/>
 
         <replace dir="${download.dir}/reports" value="${reports.db.host}" token="localhost"/>
         <replace dir="${download.dir}/reports" value="${reports.db.name}" token="openmrs_test"/>
