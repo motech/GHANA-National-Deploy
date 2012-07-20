@@ -58,6 +58,7 @@
     <target name="setup">
         <delete dir="${download.dir}"/>
         <mkdir dir="${download.dir}"/>
+        <mkdir dir="${motech.logs.dir}" />
     </target>
 
     <target name="download.latest.national.from.hudson">
