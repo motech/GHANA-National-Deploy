@@ -150,13 +150,7 @@
             <arg value="DELETE"/>
             <arg value="http://${couchdb.server}:${couchdb.port}/${couchdb.appointments.db}"/>
         </exec>
-        <exec executable="curl">
-            <arg value="-s"/>
-            <arg value="-S"/>
-            <arg value="-X"/>
-            <arg value="DELETE"/>
-            <arg value="http://${couchdb.server}:${couchdb.port}/${couchdb.cms.db}"/>
-        </exec>
+
         <exec executable="curl">
             <arg value="-s"/>
             <arg value="-S"/>
