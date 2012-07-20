@@ -62,21 +62,21 @@
 
     <target name="download.latest.national.from.hudson">
         <get dest="${download.dir}/${app.name}.war"
-             src="${hudson.ghana.national.url}"/>
-        <echo message="downloaded ${app.name}-${hudson.ghana.national.release.version}.war from hudson"/>
+             src="${ghana.national.url}"/>
+        <echo message="downloaded ${app.name}-${ghana.national.release.version}.war from hudson"/>
     </target>
 
     <target name="download.latest.deliverytools.from.hudson">
         <get dest="${download.dir}/deliverytools.war"
-             src="${hudson.delivery.tools.url}"/>
-        <echo message="downloaded ghana-deliverytools-web-${hudson.delivery.tools.release.version}.war from hudson"/>
+             src="${delivery.tools.url}"/>
+        <echo message="downloaded ghana-deliverytools-web-${delivery.tools.release.version}.war from hudson"/>
     </target>
 
 
     <target name="download.latest.testapp.from.hudson">
         <get dest="${download.dir}/ghana-national-test.war"
-             src="${hudson.ghana.national.test.url}"/>
-        <echo message="downloaded ghana-national-test-${hudson.ghana.national.release.version}.war from hudson"/>
+             src="${ghana.national.test.url}"/>
+        <echo message="downloaded ghana-national-test-${ghana.national.release.version}.war from hudson"/>
     </target>
 
     <target name="merge.test.app.to.national.app">
@@ -95,6 +95,23 @@
             <zipfileset dir="${download.dir}/temp_merge/test/js" prefix="js" excludes="lib/*"/>
             <zipgroupfileset dir="${download.dir}" includes="${app.name}_bk.war"/>
         </zip>
+    </target>
+
+    <target name="merge.configuration.files" depends="download.latest.national.from.hudson">
+        <delete dir="${download.dir}/app_merge"/>
+        <mkdir dir="${download.dir}/app_merge"/>
+        <unzip dest="${download.dir}/app_merge">
+            <fileset dir="${download.dir}">
+                <include name="${app.name}.war"/>
+            </fileset>
+        </unzip>
+
+        <copy todir="${download.dir}/app_merge/WEB-INF/classes" overwrite="true">
+            <fileset dir="${basedir}/artifacts/properties/${env}">
+                <exclude name="deploy.properties"/>
+            </fileset>
+        </copy>
+        <zip destfile="${download.dir}/${app.name}.war" basedir="${download.dir}/app_merge"/>
     </target>
 
     <target name="drop.national.db">
@@ -140,11 +157,19 @@
             <arg value="DELETE"/>
             <arg value="http://${couchdb.server}:${couchdb.port}/${couchdb.cms.db}"/>
         </exec>
+        <exec executable="curl">
+            <arg value="-s"/>
+            <arg value="-S"/>
+            <arg value="-X"/>
+            <arg value="DELETE"/>
+            <arg value="http://${couchdb.server}:${couchdb.port}/${couchdb.outbox.db}"/>
+        </exec>
         <echo message="dropped data from couchdb in ${couchdb.server}"/>
     </target>
 
     <target name="openmrs.db.migrate">
-        <sql driver="${mysql.driver}" url="jdbc:mysql://${mysql.server}:${mysql.port}?autoReconnect=true" userid="${mysql.user}" classpathref="mysql.classpath" password="${mysql.password}">
+        <sql driver="${mysql.driver}" url="jdbc:mysql://${mysql.server}:${mysql.port}?autoReconnect=true"
+             userid="${mysql.user}" classpathref="mysql.classpath" password="${mysql.password}">
             drop database if exists ${mysql.openmrs.db.name};
             create database ${mysql.openmrs.db.name} default charset utf8;
             grant all on ${mysql.openmrs.db.name}.* to '${mysql.openmrs.user}'@'localhost' identified by
@@ -172,23 +197,37 @@
     </target>
 
     <target name="quartz.db.setup">
-        <sql driver="${mysql.driver}" url="jdbc:mysql://${mysql.server}:${mysql.port}?autoReconnect=true" userid="${mysql.user}" classpathref="mysql.classpath" password="${mysql.password}">
-            <fileset dir="${basedir}/artifacts/sql/ghana">
-                <include name="create_db_schema_quartz_v2.1.sql"/>
+        <sql driver="${mysql.driver}" url="jdbc:mysql://${mysql.server}:${mysql.port}?autoReconnect=true"
+             userid="${mysql.user}" classpathref="mysql.classpath" password="${mysql.password}">
+            drop database if exists ${mysql.quartz.db.name};
+            create database ${mysql.quartz.db.name} default charset utf8;
+        </sql>
+        <sql driver="${mysql.driver}"
+             url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.quartz.db.name}?autoReconnect=true"
+             userid="${mysql.user}" classpathref="mysql.classpath" password="${mysql.password}">
+            <fileset dir="../build/sql">
+                <include name="quartz_database_setup.sql"/>
             </fileset>
         </sql>
         <echo message="creation of ${mysql.quartz.db.name} db successful."/>
     </target>
 
     <target name="aggregator.db.setup">
-        <sql driver="${mysql.driver}" url="jdbc:mysql://${mysql.server}:${mysql.port}?autoReconnect=true" userid="${mysql.user}" classpathref="mysql.classpath" password="${mysql.password}">
-            <fileset dir="${basedir}/artifacts/sql/ghana">
-                <include name="aggregator_database_and_tables.sql"/>
+        <sql driver="${mysql.driver}" url="jdbc:mysql://${mysql.server}:${mysql.port}?autoReconnect=true"
+             userid="${mysql.user}" classpathref="mysql.classpath" password="${mysql.password}">
+            drop database if exists ${mysql.aggregator.db.name};
+            create database ${mysql.aggregator.db.name} default charset utf8;
+        </sql>
+        <sql driver="${mysql.driver}"
+             url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.aggregator.db.name}?autoReconnect=true"
+             userid="${mysql.user}" classpathref="mysql.classpath" password="${mysql.password}">
+            <fileset dir="../build/sql">
+                <include name="aggregator_database_setup.sql"/>
             </fileset>
         </sql>
     </target>
 
-    <target name="openmrs.db.create" depends="download.latest.national.from.hudson">
+    <target name="openmrs.db.create" depends="unzip.ghana.national">
         <!-- drop existing schema -->
         <sql driver="${mysql.driver}"
              url="jdbc:mysql://${mysql.server}:${mysql.port}?autoReconnect=true"
@@ -203,14 +242,9 @@
             '${mysql.openmrs.password}';
             flush privileges;
         </sql>
-        <unzip dest="${download.dir}/${app.name}"
-               src="${download.dir}/${app.name}.war">
-        </unzip>
-        <mkdir dir="../build"/>
-        <move todir="../build">
-            <fileset dir="${download.dir}/${app.name}/build"/>
-        </move>
-        <sql driver="${mysql.driver}" url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.openmrs.db.name}?autoReconnect=true" userid="${mysql.user}" classpathref="mysql.classpath"
+        <sql driver="${mysql.driver}"
+             url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.openmrs.db.name}?autoReconnect=true"
+             userid="${mysql.user}" classpathref="mysql.classpath"
              password="${mysql.password}">
             <fileset dir="../build/sql">
                 <include name="0.openmrs-1.8.sql"/>
@@ -218,7 +252,17 @@
         </sql>
     </target>
 
-    <target name="openmrs.db.deltas">
+    <target name="unzip.ghana.national" depends="download.latest.national.from.hudson">
+        <unzip dest="${download.dir}/${app.name}"
+               src="${download.dir}/${app.name}.war">
+        </unzip>
+        <mkdir dir="../build"/>
+        <move todir="../build">
+            <fileset dir="${download.dir}/${app.name}/build"/>
+        </move>
+    </target>
+
+    <target name="openmrs.db.deltas" depends="unzip.ghana.national">
         <!-- run changelog -->
         <path id="dependencies">
             <fileset dir="./lib/" includes="*.jar"/>
@@ -226,7 +270,8 @@
         <taskdef resource="liquibasetasks.properties">
             <classpath refid="dependencies"/>
         </taskdef>
-        <updateDatabase changeLogFile="../build/sql/master.xml" driver="${mysql.driver}" url="${mysql.url}" username="${mysql.user}" password="${mysql.password}" dropFirst="false"
+        <updateDatabase changeLogFile="../build/sql/master.xml" driver="${mysql.driver}" url="${mysql.url}"
+                        username="${mysql.user}" password="${mysql.password}" dropFirst="false"
                         classpathref="dependencies"/>
     </target>
 
@@ -248,7 +293,7 @@
 
     <target name="download.tools.jar">
         <get dest="${download.dir}/${ghana.national.tools.name}.jar"
-             src="${hudson.ghana.national.tools.url}"/>
+             src="${ghana.national.tools.url}"/>
         <unzip dest="${download.dir}">
             <fileset dir="${download.dir}">
                 <include name="${ghana.national.tools.name}.jar"/>
@@ -256,7 +301,7 @@
         </unzip>
     </target>
 
-    <target name="load.audio.files" depends="download.tools.jar">
+    <target name="load.audio.files" depends="download.tools.jar,unzip.ghana.national">
         <delete dir="audio"/>
         <exec executable="git">
             <arg value="clone"/>
@@ -283,7 +328,9 @@
     </target>
 
     <target name="drop.motechmodule.tables">
-        <sql driver="${mysql.driver}" url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.openmrs.db.name}?autoReconnect=true" userid="${mysql.user}" classpathref="mysql.classpath"
+        <sql driver="${mysql.driver}"
+             url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.openmrs.db.name}?autoReconnect=true"
+             userid="${mysql.user}" classpathref="mysql.classpath"
              password="${mysql.password}">
             <fileset dir="${basedir}/artifacts/sql/ghana">
                 <include name="clear_motechmodule_tables.sql"/>
@@ -310,12 +357,14 @@
 
     <target name="deploy.reports">
         <replace file="${basedir}/artifacts/sql/ghana/birt.sql" token="@OPENMRS@" value="${openmrs.directory}"/>
-        <sql driver="${mysql.driver}" url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.openmrs.db.name}?autoReconnect=true" userid="${mysql.user}" classpathref="mysql.classpath"
-             password="${mysql.password}">
-            <fileset dir="${basedir}/artifacts/sql/ghana">
-                <include name="birt.sql"/>
-                <include name="reports.sql"/>
-            </fileset>
+        <sql driver="${mysql.driver}"
+        url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.openmrs.db.name}?autoReconnect=true"
+        userid="${mysql.user}" classpathref="mysql.classpath"
+        password="${mysql.password}">
+        <fileset dir="${basedir}/artifacts/sql/ghana">
+        <include name="birt.sql"/>
+        <include name="reports.sql"/>
+        </fileset>
         </sql>
 
         <delete dir="${openmrs.directory}/reports"/>
@@ -328,15 +377,23 @@
 
         <unzip dest="${download.dir}/reports" src="${download.dir}/reports.zip"/>
 
+        <replace dir="${download.dir}/reports" value="${reports.db.host}" token="localhost"/>
+        <replace dir="${download.dir}/reports" value="${reports.db.name}" token="openmrs_test"/>
+        <replace dir="${download.dir}/reports" value="${reports.db.password}" token="cGFzc3dvcmQ="/>
+        <replace dir="${download.dir}/reports" value="${reports.db.username}" token="root"/>
+
         <move todir="${download.dir}/reports" flatten="true">
             <fileset dir="${download.dir}/reports">
                 <include name="**/*.rptdesign"/>
             </fileset>
         </move>
 
-        <copy tofile="${openmrs.directory}/reports/1.rptdesign" file="${download.dir}/reports/child-health-return.rptdesign"/>
-        <copy tofile="${openmrs.directory}/reports/2.rptdesign" file="${download.dir}/reports/communicable-disease-surveillance.rptdesign"/>
-        <copy tofile="${openmrs.directory}/reports/3.rptdesign" file="${download.dir}/reports/immunization-returns.rptdesign"/>
+        <copy tofile="${openmrs.directory}/reports/1.rptdesign"
+              file="${download.dir}/reports/child-health-return.rptdesign"/>
+        <copy tofile="${openmrs.directory}/reports/2.rptdesign"
+              file="${download.dir}/reports/communicable-disease-surveillance.rptdesign"/>
+        <copy tofile="${openmrs.directory}/reports/3.rptdesign"
+              file="${download.dir}/reports/immunization-returns.rptdesign"/>
         <copy tofile="${openmrs.directory}/reports/4.rptdesign" file="${download.dir}/reports/malaria.rptdesign"/>
         <copy tofile="${openmrs.directory}/reports/5.rptdesign" file="${download.dir}/reports/mid-wife.rptdesign"/>
         <copy tofile="${openmrs.directory}/reports/6.rptdesign" file="${download.dir}/reports/opd-morbidity.rptdesign"/>
@@ -345,7 +402,7 @@
 
     <target name="openmrs.omod.setup">
         <get dest="${download.dir}/ghana-national-common-1.0-SNAPSHOT-resources.zip"
-             src="http://nexus.motechproject.org/content/repositories/snapshots/org/motechproject/ghana-national-common/1.0-SNAPSHOT/ghana-national-common-1.0-SNAPSHOT-resources.zip"/>
+             src="${ghana.national.commons.url}"/>
 
         <unzip dest="${download.dir}">
             <fileset dir="${download.dir}">
@@ -356,19 +413,22 @@
         <delete dir="${openmrs.directory}"/>
         <mkdir dir="${openmrs.directory}"/>
         <mkdir dir="${openmrs.directory}/modules"/>
-        <copy file="${download.dir}/openmrs-data/openmrs-runtime.properties" tofile="${openmrs.directory}/openmrs-runtime.properties"/>
+        <copy file="${download.dir}/openmrs-data/openmrs-runtime.properties"
+              tofile="${openmrs.directory}/openmrs-runtime.properties"/>
         <copy todir="${openmrs.directory}/modules">
             <fileset dir="${download.dir}/openmrs-data/modules">
                 <include name="**/*.omod"/>
             </fileset>
         </copy>
 
-        <get dest="${download.dir}/idgen-omod.omod" src="http://nexus.motechproject.org/content/repositories/snapshots/org/motechproject/idgen-omod/1.0-SNAPSHOT/idgen-omod-1.0-SNAPSHOT.jar"/>
+        <get dest="${download.dir}/idgen-omod.omod" src="${idgen.url}"/>
         <copy file="${download.dir}/idgen-omod.omod" tofile="${openmrs.directory}/modules/idgen-omod.omod"/>
     </target>
 
     <target name="openmrs.data.migrate" depends="openmrs.db.migrate, openmrs.db.deltas">
-        <sql driver="${mysql.driver}" url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.openmrs.db.name}?autoReconnect=true" userid="${mysql.user}" classpathref="mysql.classpath"
+        <sql driver="${mysql.driver}"
+             url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.openmrs.db.name}?autoReconnect=true"
+             userid="${mysql.user}" classpathref="mysql.classpath"
              password="${mysql.password}">
             <fileset dir="${basedir}/artifacts/sql/ghana">
                 <include name="reset_admin_password.sql"/>
@@ -377,8 +437,15 @@
     </target>
     <target name="openmrs.db.setup" depends="openmrs.db.create, openmrs.db.deltas"/>
     <target name="redeploy.openmrs" depends="openmrs.omod.setup, deploy.reports, undeploy.openmrs, deploy.openmrs"/>
-    <target name="redeploy.ghana.national" depends="download.latest.national.from.hudson, download.latest.testapp.from.hudson, merge.test.app.to.national.app, undeploy.national, deploy.national, load.seed.data"/>
-    <target name="redeploy.delivery.tools" depends="download.latest.deliverytools.from.hudson, undeploy.deliverytools, deploy.deliverytools"/>
+    <target name="redeploy.ghana.national" depends="download.latest.national.from.hudson,
+                                                    download.latest.testapp.from.hudson,
+                                                    merge.test.app.to.national.app,
+                                                    merge.configuration.files,
+                                                    undeploy.national,
+                                                    deploy.national,
+                                                    load.seed.data"/>
+    <target name="redeploy.delivery.tools"
+            depends="download.latest.deliverytools.from.hudson, undeploy.deliverytools, deploy.deliverytools"/>
 
     <target name="init.migrated" depends="setup,
                                           drop.national.db,
