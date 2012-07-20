@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+    <appender class="org.apache.log4j.RollingFileAppender" name="logfile">
+        <param value="${catalina.home}/logs/ghana.log" name="File"/>
+        <param name="Append" value="true"/>
+        <param name="MaxFileSize" value="4096KB"/>
+        <param name="maxBackupIndex" value="10"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param value="%d %p [%t] [%c] - %m%n" name="ConversionPattern"/>
+        </layout>
+    </appender>
+    <appender class="org.apache.log4j.RollingFileAppender" name="migrationLogfile">
+        <param value="${catalina.home}/logs/ghana-migration.log" name="File"/>
+        <param name="Append" value="true"/>
+        <param name="MaxFileSize" value="4096KB"/>
+        <param name="maxBackupIndex" value="10"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param value="%d %p [%c] - %m%n" name="ConversionPattern"/>
+        </layout>
+    </appender>
+    <appender class="org.apache.log4j.RollingFileAppender" name="passwordLog">
+        <param value="${catalina.home}/logs/ghana_password.log" name="File"/>
+        <param name="Append" value="true"/>
+        <param name="MaxFileSize" value="4096KB"/>
+        <param name="maxBackupIndex" value="5"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param value="%d %p [%c] - %m%n" name="ConversionPattern"/>
+        </layout>
+    </appender>
+
+    <logger name="org.springframework">
+        <level value="error"/>
+    </logger>
+    <logger name="org.quartz">
+        <level value="error"/>
+    </logger>
+    <logger name="org.openxdata">
+        <level value="warn"/>
+    </logger>
+    <logger name="org.motechproject.openmrs.model.Password">
+        <level value="info"/>
+        <appender-ref ref="passwordLog"/>
+    </logger>
+    <logger name="org.motechproject">
+        <level value="warn"/>
+    </logger>
+    <logger name="org.motechproject.ghana.national.tools">
+        <level value="info"/>
+        <appender-ref ref="migrationLogfile"/>
+    </logger>
+    <logger name="org.motechproject.ghana.national.service">
+        <level value="info"/>
+    </logger>
+    <logger name="org.motechproject.scheduletracking.api">
+        <level value="info"/>
+    </logger>
+    <logger name="metrics">
+        <level value="warn"/>
+    </logger>
+    <logger name="org.openmrs.api">
+        <level value="warn"/>
+    </logger>
+
+    <root>
+        <priority value="info"/>
+        <appender-ref ref="logfile"/>
+    </root>
+</log4j:configuration>
