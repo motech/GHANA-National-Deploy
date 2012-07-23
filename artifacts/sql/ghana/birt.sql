@@ -1,6 +1,6 @@
 delete from global_property where property like 'birt.%';
 
-INSERT INTO global_property (property,property_value,description,uuid) VALUES ('birt.birtHome','/var/lib/birt/ReportEngine','@OPENMRS@/reports/datasets','d03cc925-fa3f-4f64-9292-a5ee7b991652');
+INSERT INTO global_property (property,property_value,description,uuid) VALUES ('birt.birtHome','/home/motech/birt/ReportEngine','@OPENMRS@/reports/datasets','d03cc925-fa3f-4f64-9292-a5ee7b991652');
 INSERT INTO global_property (property,property_value,description,uuid) VALUES ('birt.datasetDir','@OPENMRS@/reports/datasets','Specifies the absolute path to the reports dataset directory (for CSV/XML data sources).','dac4f6fa-4373-4562-97cd-6dbfa17c6c2c');
 INSERT INTO global_property (property,property_value,description,uuid) VALUES ('birt.defaultReportDesignFile','default.rptdesign','Specifies the absolute path to the reports dataset directory (for CSV/XML data sources).','f1fae7b2-9a1c-42a1-9f68-14cee21e91fc');
 INSERT INTO global_property (property,property_value,description,uuid) VALUES ('birt.imageDir','@OPENMRS@/reports/output/images','Specifies the absolute path to the image directory where BIRT will find generated charts and graphs.','9f8f0383-4c19-4d53-bf1c-148d1d0d6677');
