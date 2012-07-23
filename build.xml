@@ -58,6 +58,7 @@
     <target name="setup">
         <delete dir="${download.dir}"/>
         <mkdir dir="${download.dir}"/>
+        <mkdir dir="${motech.logs.dir}" />
     </target>
 
     <target name="download.latest.national.from.hudson">
@@ -150,12 +151,20 @@
             <arg value="DELETE"/>
             <arg value="http://${couchdb.server}:${couchdb.port}/${couchdb.appointments.db}"/>
         </exec>
+
         <exec executable="curl">
             <arg value="-s"/>
             <arg value="-S"/>
             <arg value="-X"/>
             <arg value="DELETE"/>
-            <arg value="http://${couchdb.server}:${couchdb.port}/${couchdb.cms.db}"/>
+            <arg value="http://${couchdb.server}:${couchdb.port}/${couchdb.ivr.callflow.db}"/>
+        </exec>
+        <exec executable="curl">
+            <arg value="-s"/>
+            <arg value="-S"/>
+            <arg value="-X"/>
+            <arg value="DELETE"/>
+            <arg value="http://${couchdb.server}:${couchdb.port}/${couchdb.retries.db}"/>
         </exec>
         <exec executable="curl">
             <arg value="-s"/>
@@ -163,6 +172,13 @@
             <arg value="-X"/>
             <arg value="DELETE"/>
             <arg value="http://${couchdb.server}:${couchdb.port}/${couchdb.outbox.db}"/>
+        </exec>
+        <exec executable="curl">
+            <arg value="-s"/>
+            <arg value="-S"/>
+            <arg value="-X"/>
+            <arg value="DELETE"/>
+            <arg value="http://${couchdb.server}:${couchdb.port}/${couchdb.trees.db}"/>
         </exec>
         <echo message="dropped data from couchdb in ${couchdb.server}"/>
     </target>
@@ -284,7 +300,7 @@
         <java fork="false" classname="${couchdb.seed.main.class}">
             <classpath>
                 <path location="${tomcat.home}/webapps/${app.name}/WEB-INF/classes"/>
-                <path location="${download.dir}"/>
+                <path location="${download.dir}/tools"/>
                 <path refid="lib.path"/>
             </classpath>
         </java>
@@ -294,7 +310,7 @@
     <target name="download.tools.jar">
         <get dest="${download.dir}/${ghana.national.tools.name}.jar"
              src="${ghana.national.tools.url}"/>
-        <unzip dest="${download.dir}">
+        <unzip dest="${download.dir}/tools">
             <fileset dir="${download.dir}">
                 <include name="${ghana.national.tools.name}.jar"/>
             </fileset>
@@ -319,7 +335,7 @@
         <java fork="false" classname="${audio.loading.main.class}">
             <classpath>
                 <path location="${tomcat.home}/webapps/${app.name}/WEB-INF/classes"/>
-                <path location="${download.dir}"/>
+                <path location="${download.dir}/tools"/>
                 <path refid="lib.path"/>
             </classpath>
         </java>
@@ -349,7 +365,7 @@
             <classpath>
                 <path location="${tomcat.home}/webapps/${app.name}/WEB-INF/classes"/>
                 <path refid="lib.path"/>
-                <path location="${download.dir}"/>
+                <path location="${download.dir}/tools"/>
             </classpath>
         </java>
         <echo message="Schedule data loaded into ${couchdb.national.db} database"/>
