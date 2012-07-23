@@ -112,6 +112,9 @@
                 <exclude name="deploy.properties"/>
             </fileset>
         </copy>
+        <touch>
+            <fileset dir="${download.dir}/app_merge"/>
+        </touch>
         <zip destfile="${download.dir}/${app.name}.war" basedir="${download.dir}/app_merge"/>
     </target>
 
@@ -450,8 +453,7 @@
                                           redeploy.openmrs,
                                           redeploy.delivery.tools,
                                           redeploy.ghana.national,
-                                          migrate.schedule.data,
-                                          drop.motechmodule.tables"/>
+                                          migrate.schedule.data"/>
 
     <target name="init" depends="setup,
                                  drop.national.db,
@@ -460,8 +462,7 @@
                                  quartz.db.setup,
                                  redeploy.openmrs,
                                  redeploy.delivery.tools,
-                                 redeploy.ghana.national,
-                                 drop.motechmodule.tables"/>
+                                 redeploy.ghana.national"/>
 
     <target name="quick.deploy" depends="setup,
                                          openmrs.db.deltas,
