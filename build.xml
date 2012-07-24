@@ -204,13 +204,13 @@
             <arg value="${mysql.user}"/>
             <arg value="${mysql.password}"/>
             <arg value="${mysql.openmrs.db.name}"/>
-            <arg value="${basedir}\artifacts\sql\ghana\openmrs.1.8.migrated.sql"/>
+            <arg value="${basedir}\artifacts\sql\ghana\openmrs-production-dump.sql"/>
         </exec>
         <exec executable="${basedir}/artifacts/sql/ghana/load_schema.sh" osfamily="unix">
             <arg value="${mysql.user}"/>
             <arg value="${mysql.password}"/>
             <arg value="${mysql.openmrs.db.name}"/>
-            <arg value="${basedir}/artifacts/sql/ghana/openmrs.1.8.migrated.sql"/>
+            <arg value="${basedir}/artifacts/sql/ghana/openmrs-production-dump.sql"/>
         </exec>
         <echo message="recreated schema for ${mysql.openmrs.db.name}"/>
     </target>
