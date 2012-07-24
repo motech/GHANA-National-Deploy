@@ -110,6 +110,7 @@
         <copy todir="${download.dir}/app_merge/WEB-INF/classes" overwrite="true">
             <fileset dir="${basedir}/artifacts/properties/${env}">
                 <exclude name="deploy.properties"/>
+                <exclude name="delivery"/>
             </fileset>
         </copy>
         <touch>
