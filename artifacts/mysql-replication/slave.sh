@@ -13,6 +13,11 @@ findAndReplace "server-id" "$slaveServerId"
 mv /etc/my.cnf /etc/my.cnf.repl.bak
 mv /tmp/my.cnf /etc/my.cnf
 
+echo "Creating mysql-bin file"
+mkdir -p /var/log/mysql/
+touch /var/log/mysql/mysql-bin.log
+chmod -R 777 /var/log/mysql
+
 stopMySQL
 
 echo "Starting MySQL in safe mode.."
