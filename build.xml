@@ -423,7 +423,7 @@
         <get dest="${download.dir}/ghana-national-common-1.0-SNAPSHOT-resources.zip"
              src="${ghana.national.commons.url}"/>
 
-        <unzip dest="${download.dir}">
+        <unzip dest="${download.dir}/resources">
             <fileset dir="${download.dir}">
                 <include name="ghana-national-common-1.0-SNAPSHOT-resources.zip"/>
             </fileset>
@@ -432,10 +432,10 @@
         <delete dir="${openmrs.directory}"/>
         <mkdir dir="${openmrs.directory}"/>
         <mkdir dir="${openmrs.directory}/modules"/>
-        <copy file="${basedir}/artifacts/properties/${env}/openmrs-runtime.properties"
+        <copy file="${basedir}/artifacts/properties/${env}/openmrs-data/openmrs-runtime.properties"
               tofile="${openmrs.directory}/openmrs-runtime.properties"/>
         <copy todir="${openmrs.directory}/modules">
-            <fileset dir="${download.dir}/openmrs-data/modules">
+            <fileset dir="${download.dir}/resources/openmrs-data/modules">
                 <include name="**/*.omod"/>
             </fileset>
         </copy>
