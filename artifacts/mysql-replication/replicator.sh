@@ -1,7 +1,6 @@
 #!/bin/sh
 
-. ./slave.properties
-. ./master.properties
+. ./replication.properties
 
 #echo "master-username = $musername"
 #echo "master-password = $mpassword"
@@ -10,6 +9,11 @@
 #echo "slave-username = $susername"
 #echo "slave-password = $spassword"
 #echo "slave-host = $shost" 
+
+if [ `whoami` != 'root' ]; then
+	echo "Can be exeucted only with root privileges"
+	exit 1;
+fi
 
 stopMySQL() {
     echo -e "\n Stopping MySQL instance"
