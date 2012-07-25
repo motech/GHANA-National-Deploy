@@ -28,6 +28,16 @@
                 war="file:${download.dir}/${app.name}.war"/>
     </target>
 
+    <target name="deploy.batch" description="Install">
+        <deploy url="${tomcat.manager.url}" username="${tomcat.user}" password="${tomcat.password}" path="/${batch.app.name}"
+                war="file:${download.dir}/${batch.app.name}.war"/>
+    </target>
+
+    <target name="undeploy.batch" description="Remove">
+        <undeploy url="${tomcat.manager.url}" failonerror="false" username="${tomcat.user}"
+                  password="${tomcat.password}" path="/${batch.app.name}"/>
+    </target>
+
     <target name="deploy.openmrs" description="Install">
         <deploy url="${tomcat.manager.url}" username="${tomcat.user}" password="${tomcat.password}" path="/openmrs"
                 war="file:${basedir}/artifacts/war/openmrs.war"/>
@@ -80,6 +90,12 @@
         <echo message="downloaded ghana-national-test-${ghana.national.release.version}.war from hudson"/>
     </target>
 
+    <target name="download.latest.batch.app.from.hudson">
+        <get dest="${download.dir}/ghana-national-batch.war"
+             src="${ghana.national.batch.url}"/>
+        <echo message="downloaded ghana-national-batch.war from hudson"/>
+    </target>
+
     <target name="merge.test.app.to.national.app">
         <delete dir="${download.dir}/temp_merge"/>
         <mkdir dir="${download.dir}/temp_merge"/>
@@ -117,6 +133,26 @@
             <fileset dir="${download.dir}/app_merge"/>
         </touch>
         <zip destfile="${download.dir}/${app.name}.war" basedir="${download.dir}/app_merge"/>
+    </target>
+
+    <target name="merge.batch.configuration.files" depends="download.latest.batch.app.from.hudson">
+        <delete dir="${download.dir}/batch_app_merge"/>
+        <mkdir dir="${download.dir}/batch_app_merge"/>
+        <unzip dest="${download.dir}/batch_app_merge">
+            <fileset dir="${download.dir}">
+                <include name="${batch.app.name}.war"/>
+            </fileset>
+        </unzip>
+
+        <copy todir="${download.dir}/batch_app_merge/WEB-INF/classes" overwrite="true">
+            <fileset dir="${basedir}/artifacts/properties/${env}">
+                <include name="delivery/*.properties"/>
+            </fileset>
+        </copy>
+        <touch>
+            <fileset dir="${download.dir}/batch_app_merge"/>
+        </touch>
+        <zip destfile="${download.dir}/${batch.app.name}.war" basedir="${download.dir}/batch_app_merge"/>
     </target>
 
     <target name="drop.national.db">
@@ -455,6 +491,7 @@
     </target>
     <target name="openmrs.db.setup" depends="openmrs.db.create, openmrs.db.deltas"/>
     <target name="redeploy.openmrs" depends="openmrs.omod.setup, deploy.reports, undeploy.openmrs, deploy.openmrs"/>
+
     <target name="redeploy.ghana.national" depends="download.latest.national.from.hudson,
                                                     download.latest.testapp.from.hudson,
                                                     merge.test.app.to.national.app,
@@ -487,4 +524,7 @@
     <target name="quick.deploy" depends="setup,
                                          openmrs.db.deltas,
                                          redeploy.ghana.national"/>
+
+    <target name="deploy.ghana.national.batch" depends="merge.batch.configuration.files,undeploy.batch,deploy.batch" />
+
 </project>
