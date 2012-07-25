@@ -1,8 +1,7 @@
 #!/bin/bash
 
 # MySQL Master configurator
-. ./master.properties
-. ./slave.properties
+. ./replicator.sh
 
 # rm -f /tmp/my.cnf
 
@@ -14,36 +13,6 @@ case $runningStatus in
 esac
 
 mysql -u$musername -p$mpassword -e "grant all on *.* to '$susername'@'$shost' identified by '$spassword'"
-
-findAndReplace () {                            
-found=""
-if [ "`grep "$1" /etc/my.cnf`" == "" ]; then found="true"; fi
-
-	if [ -z "$found" ]; then    
-		sed "s/"$1".*=.*/"$1=$2"/g" /tmp/my.cnf > /tmp/my.cnf.bak
-	else                
-		sed '/\[mysqld\]/a\
-'$1=$2'
-		' /tmp/my.cnf > /tmp/my.cnf.bak  	                 
-	fi                  
-	mv /tmp/my.cnf.bak /tmp/my.cnf 
-
-}                                              
-
-findAndDisable () {
-found=""
-if [ "`grep "$1" /etc/my.cnf`" == "" ]; then found="true"; fi
-
-        if [ -z "$found" ]; then
-                sed "s/"$1".*=.*/#"$1"/g" /tmp/my.cnf > /tmp/my.cnf.bak
-        else
-                sed '/\[mysqld\]/a\
-#'$1'
-                ' /tmp/my.cnf > /tmp/my.cnf.bak
-        fi
-        mv /tmp/my.cnf.bak /tmp/my.cnf
-
-}
 
 # modify my.cnf properties                                                 
 cp /etc/my.cnf /tmp/my.cnf
