@@ -365,6 +365,7 @@
              password="${mysql.password}">
             <fileset dir="${basedir}/artifacts/sql/ghana">
                 <include name="birt.sql"/>
+                <include name="reports.sql"/>
             </fileset>
         </sql>
 
