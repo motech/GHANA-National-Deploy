@@ -66,7 +66,12 @@ chmod -R 777 /var/log/mysql
 echo "Restarting MySQL daemon..."
 service mysqld restart
 
+# Wait for some time, until user privileges are flushed
+sleep 3
 echo "Granting replication privileges to slave host"
+mysql -u$musername -p$mpassword -e "delete from mysql.user where user='repl'"
+mysql -u$musername -p$mpassword -e "delete from mysql.db where user='repl'"
+mysql -u$musername -p$mpassword -e "flush privileges";
 mysql -u$musername -p$mpassword -e "create user 'repl'@'$shost' identified by '$spassword'"
 mysql -u$musername -p$mpassword -e "grant all on *.* to 'repl'@'$shost'";
 mysql -u$musername -p$mpassword -e "flush privileges";
@@ -74,5 +79,17 @@ mysql -u$musername -p$mpassword -e "flush privileges";
 mysql -u$musername -p$mpassword -e "flush tables with read lock";
 masterStatus=`mysql -u$musername -p$mpassword -e "show master status";`
 
-echo $masterStatus
+log_file_name=`echo $masterStatus | awk '{ print $5 }'`
+log_file_pos=`echo $masterStatus | awk '{ print $6 }'`
 
+echo "################################################################"
+echo -e "\tNote these values, required for slave configuration        "
+echo -e "\tLog file name\t\t: " $log_file_name
+echo -e "\tLog file position\t: " $log_file_pos
+echo "################################################################"
+
+echo "Taking MySQL dump of the entire DB."
+mysqldump -u$musername -p$mpassword --all-databases --master-data > mysql_master_dump.db
+mysql -u$musername -p$mpassword -e "unlock tables";
+
+echo "Completed Taking dump. Find file named 'mysql_master_dump.db' "
