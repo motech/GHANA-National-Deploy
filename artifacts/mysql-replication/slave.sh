@@ -7,7 +7,7 @@
 echo "Modifying/Inserting required properties"
 cp /etc/my.cnf /tmp/my.cnf
 findAndReplace "bind-address" "$shost"
-findAndReplace "log_bin" "\/var\/mysql\/log\/mysql-bin.log"
+findAndReplace "log_bin" "\/var\/log\/mysql\/mysql-bin.log"
 findAndReplace "server-id" "$slaveServerId"
 
 mv /etc/my.cnf /etc/my.cnf.repl.bak
