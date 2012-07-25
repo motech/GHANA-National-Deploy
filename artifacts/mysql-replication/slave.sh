@@ -6,9 +6,12 @@
 
 echo "Modifying/Inserting required properties"
 cp /etc/my.cnf /tmp/my.cnf
-findAndReplace "bind-address" $shost
+findAndReplace "bind-address" "$shost"
 findAndReplace "log_bin" "\/var\/mysql\/log\/mysql-bin.log"
-findAndReplace "server-id" $slaveServerId
+findAndReplace "server-id" "$slaveServerId"
+
+mv /etc/my.cnf /etc/my.cnf.repl.bak
+mv /tmp/my.cnf /etc/my.cnf
 
 stopMySQL
 
@@ -26,10 +29,20 @@ echo "Restore complete."
 
 stopMySQL
 
+mysqld_safe --skip-slave-start --skip-grant-tables & 2> /dev/null
+
+echo "Changing root user privileges"
+sleep 1
+mysql -uroot -e "update mysql.user set password=PASSWORD('$spassword') where User = 'root'"
+mysql -uroot -e "flush privileges"
+
+stopMySQL
+
 sleep 2
 mysqld_safe --skip-slave-start & 2> /dev/null
 
 sleep 2
+mysql -uroot -p$spassword -e "RESET MASTER"
 mysql -uroot -p$spassword -e "CHANGE MASTER TO MASTER_HOST='$mhost', MASTER_USER='$susername', MASTER_PASSWORD='$spassword', MASTER_LOG_FILE='$log_file', MASTER_LOG_POS=$log_pos"
 
 stopMySQL
@@ -39,3 +52,4 @@ stopMySQL
 mysql -uroot -p$spassword -e "show processlist"
 mysql -uroot -p$spassword -e "show slave status"
 mysql -uroot -p$spassword -e "show status like 'Slave%'"
+

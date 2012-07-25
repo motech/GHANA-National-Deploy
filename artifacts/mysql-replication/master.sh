@@ -34,15 +34,14 @@ chmod -R 777 /var/log/mysql
 
 echo "Restarting MySQL daemon..."
 service mysqld restart
+# For Mac
+# /usr/local/Cellar/mysql/5.5.20/support-files/mysql.server restart
 
 # Wait for some time, until user privileges are flushed
 sleep 3
 echo "Granting replication privileges to slave host"
-mysql -u$musername -p$mpassword -e "delete from mysql.user where user='repl'"
-mysql -u$musername -p$mpassword -e "delete from mysql.db where user='repl'"
-mysql -u$musername -p$mpassword -e "flush privileges";
-mysql -u$musername -p$mpassword -e "create user 'repl'@'$shost' identified by '$spassword'"
-mysql -u$musername -p$mpassword -e "grant all on *.* to 'repl'@'$shost'";
+mysql -u$musername -p$mpassword -e "grant replication slave on *.* to 'root'@'$shost' identified by '$spassword'"
+mysql -u$musername -p$mpassword -e "grant all privileges on *.* to 'root'@'$shost'"
 mysql -u$musername -p$mpassword -e "flush privileges";
 
 mysql -u$musername -p$mpassword -e "flush tables with read lock";

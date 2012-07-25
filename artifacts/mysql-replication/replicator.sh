@@ -17,6 +17,12 @@ stopMySQL() {
     mysqladmin -uroot -p$spassword shutdown 2> /dev/null
 }
 
+stopMySQLNoPassword() {
+    echo -e "\n Stopping MySQL instance"
+    sleep 2
+    mysqladmin -uroot shutdown 2> /dev/null
+}
+
 findAndReplace () {
 found=""
 if [ "`grep "$1" /etc/my.cnf`" == "" ]; then found="true"; fi
