@@ -58,7 +58,7 @@
     <target name="setup">
         <delete dir="${download.dir}"/>
         <mkdir dir="${download.dir}"/>
-        <mkdir dir="${motech.logs.dir}" />
+        <mkdir dir="${motech.logs.dir}"/>
     </target>
 
     <target name="download.latest.national.from.hudson">
@@ -377,13 +377,12 @@
     <target name="deploy.reports">
         <replace file="${basedir}/artifacts/sql/ghana/birt.sql" token="@OPENMRS@" value="${openmrs.directory}"/>
         <sql driver="${mysql.driver}"
-        url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.openmrs.db.name}?autoReconnect=true"
-        userid="${mysql.user}" classpathref="mysql.classpath"
-        password="${mysql.password}">
-        <fileset dir="${basedir}/artifacts/sql/ghana">
-        <include name="birt.sql"/>
-        <include name="reports.sql"/>
-        </fileset>
+             url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.openmrs.db.name}?autoReconnect=true"
+             userid="${mysql.user}" classpathref="mysql.classpath" password="${mysql.password}">
+            <fileset dir="${basedir}/artifacts/sql/ghana">
+                <include name="birt.sql"/>
+                <include name="reports.sql"/>
+            </fileset>
         </sql>
 
         <delete dir="${openmrs.directory}/reports"/>
@@ -432,7 +431,7 @@
         <delete dir="${openmrs.directory}"/>
         <mkdir dir="${openmrs.directory}"/>
         <mkdir dir="${openmrs.directory}/modules"/>
-        <copy file="${download.dir}/openmrs-data/openmrs-runtime.properties"
+        <copy file="${basedir}/artifacts/properties/${env}/openmrs-runtime.properties"
               tofile="${openmrs.directory}/openmrs-runtime.properties"/>
         <copy todir="${openmrs.directory}/modules">
             <fileset dir="${download.dir}/openmrs-data/modules">
@@ -447,8 +446,7 @@
     <target name="openmrs.data.migrate" depends="openmrs.db.migrate, openmrs.db.deltas">
         <sql driver="${mysql.driver}"
              url="jdbc:mysql://${mysql.server}:${mysql.port}/${mysql.openmrs.db.name}?autoReconnect=true"
-             userid="${mysql.user}" classpathref="mysql.classpath"
-             password="${mysql.password}">
+             userid="${mysql.user}" classpathref="mysql.classpath" password="${mysql.password}">
             <fileset dir="${basedir}/artifacts/sql/ghana">
                 <include name="reset_admin_password.sql"/>
             </fileset>
