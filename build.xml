@@ -525,6 +525,11 @@
                                          openmrs.db.deltas,
                                          redeploy.ghana.national"/>
 
-    <target name="deploy.ghana.national.batch" depends="merge.batch.configuration.files,undeploy.batch,deploy.batch" />
+    <target name="deploy.ghana.national.batch" depends="merge.batch.configuration.files,
+                                                        undeploy.deliverytools,
+                                                        undeploy.openmrs,
+                                                        undeploy.national,
+                                                        undeploy.batch,
+                                                        deploy.batch" />
 
 </project>
