@@ -1,7 +1,7 @@
 {
  "outgoing" : {
     "request":{
-        "urlPath":"http://localhost:8080/deliverytools/motech-delivery-tools/outbound/receive",
+        "urlPath":"https://app.rancardmobility.com/rmcs/sendMessage.jsp?username=GraMeaNDrm&password=g9m3e3nd6&from=1982&to=[NUMBER]&text=[TEXT]",
         "queryParameters":{
             "recipients":"$recipients",
             "message":"$message"
