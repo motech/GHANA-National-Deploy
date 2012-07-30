@@ -1,0 +1,36 @@
+#!/bin/bash
+#
+# Init file for Motech System Backup
+#
+# chkconfig: 2345 92 02
+#
+
+start() {
+	touch /tmp/dbBkp.cron
+	echo '0 */4 * * * /root/zipCouchTrigger.sh' > /tmp/dbBkp.cron
+	echo '0 */4 * * * /root/zipMySQLTrigger.sh' >> /tmp/dbBkp.cron
+	crontab /tmp/dbBkp.cron
+	rm /tmp/dbBkp.cron
+}
+
+stop() {
+	crontab -r
+}
+
+case "$1" in
+start)
+     start
+    ;;
+stop)
+    stop
+    ;;
+
+restart)
+    $0 stop
+    $0 start
+    ;;
+*)
+    echo "usage: $0 (start|stop|restart)"
+;;
+esac
+
