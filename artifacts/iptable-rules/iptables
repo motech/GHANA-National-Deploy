@@ -1,0 +1,25 @@
+*nat
+:PREROUTING ACCEPT [18332:1585376]
+:POSTROUTING ACCEPT [21:1400]
+:OUTPUT ACCEPT [21:1400]
+COMMIT
+*filter
+:INPUT ACCEPT [0:0]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+-A INPUT -d 127.0.0.0/8 ! -i lo -j REJECT --reject-with icmp-port-unreachable 
+-A INPUT -i lo -j ACCEPT 
+-A INPUT -p icmp -m icmp --icmp-type 8 -j ACCEPT 
+-A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT 
+-A INPUT -p udp -m udp --dport 5060 -j ACCEPT 
+-A INPUT -p tcp -m tcp -s 41.191.245.70 --dport 3306 -j ACCEPT 
+-A INPUT -p tcp -m tcp -s 41.191.245.70 --dport 5984 -j ACCEPT 
+-A INPUT -p tcp -m tcp -s 41.191.245.70 --dport 61616 -j ACCEPT 
+-A INPUT -p tcp -m tcp --dport 80 -j ACCEPT 
+-A INPUT -p tcp -m tcp --dport 3000 -j ACCEPT 
+-A INPUT -p tcp -m tcp --dport 12200 -j ACCEPT 
+-A INPUT -j REJECT --reject-with icmp-port-unreachable 
+-A INPUT -m limit --limit 5/min -j LOG --log-prefix "iptables denied: " --log-level 7 
+-A FORWARD -j REJECT --reject-with icmp-port-unreachable 
+-A OUTPUT -j ACCEPT 
+COMMIT
