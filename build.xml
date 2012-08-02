@@ -145,8 +145,8 @@
         </unzip>
 
         <copy todir="${download.dir}/batch_app_merge/WEB-INF/classes" overwrite="true">
-            <fileset dir="${basedir}/artifacts/properties/${env}">
-                <include name="delivery/*.properties"/>
+            <fileset dir="${basedir}/artifacts/properties/${env}/delivery">
+                <include name="*.properties"/>
             </fileset>
         </copy>
         <touch>
