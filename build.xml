@@ -492,9 +492,15 @@
     <target name="openmrs.db.setup" depends="openmrs.db.create, openmrs.db.deltas"/>
     <target name="redeploy.openmrs" depends="openmrs.omod.setup, deploy.reports, undeploy.openmrs, deploy.openmrs"/>
 
-    <target name="redeploy.ghana.national" depends="download.latest.national.from.hudson,
+    <target name="redeploy.ghana.national.with.test" depends="download.latest.national.from.hudson,
                                                     download.latest.testapp.from.hudson,
                                                     merge.test.app.to.national.app,
+                                                    merge.configuration.files,
+                                                    undeploy.national,
+                                                    deploy.national,
+                                                    load.seed.data"/>
+
+    <target name="redeploy.ghana.national" depends="download.latest.national.from.hudson,
                                                     merge.configuration.files,
                                                     undeploy.national,
                                                     deploy.national,
@@ -502,13 +508,12 @@
     <target name="redeploy.delivery.tools"
             depends="download.latest.deliverytools.from.hudson, undeploy.deliverytools, deploy.deliverytools"/>
 
-    <target name="init.migrated" depends="setup,
+    <target name="init.prod" depends="setup,
                                           drop.national.db,
                                           openmrs.data.migrate,
                                           aggregator.db.setup,
                                           quartz.db.setup,
                                           redeploy.openmrs,
-                                          redeploy.delivery.tools,
                                           redeploy.ghana.national,
                                           migrate.schedule.data"/>
 
@@ -519,7 +524,7 @@
                                  quartz.db.setup,
                                  redeploy.openmrs,
                                  redeploy.delivery.tools,
-                                 redeploy.ghana.national"/>
+                                 redeploy.ghana.national.with.test"/>
 
     <target name="quick.deploy" depends="setup,
                                          openmrs.db.deltas,
