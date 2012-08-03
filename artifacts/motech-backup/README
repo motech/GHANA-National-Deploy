@@ -1,0 +1,4 @@
+1) # PLACE ALL FILES under /root/
+2) cp motechBackup /etc/init.d/.
+3) chkconfig --add motechBackup
+4) service motechBackup start
