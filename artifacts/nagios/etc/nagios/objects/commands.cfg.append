@@ -12,3 +12,8 @@ define command{
         command_name check_mysql
         command_line $USER1$/check_mysql $HOSTADDRESS$ $ARG1$
 }
+
+define command{
+        command_name check_sip
+        command_line $USER1$/check_sip -H $HOSTADDRESS$ -u $ARG1$ -p $ARG2$ -w 500 -c 1000
+}

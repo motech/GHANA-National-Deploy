@@ -15,10 +15,11 @@ echo "Installing dependencies.."
 yum -y install  mailx sysstat crontabs httpd php gd
 
 echo "Installing nagios with nrpe.."
-yum -y install nagios-plugins nagios-nrpe nagios nagios-plugins-nrpe xinetd sipsak
+yum -y install nagios-plugins nagios-nrpe nagios nagios-plugins-nrpe xinetd sipsak nagios-plugins-perl ruby nagios-plugins-check_sip
 
 # NRPE: enabling arguments
 sed -i 's/dont_blame_nrpe=0/dont_blame_nrpe=1/g' /etc/nagios/nrpe.cfg
+sed -i 's/enable_embedded_perl=1/enable_embedded_perl=0/g' /etc/nagios/nrpe.cfg
 # Change xinetd config file to 'disable = no' for nrpe
 line_number=`grep -n 'disable' /etc/xinetd.d/nrpe | cut -d ':' -f 1`
 sed -i "$line_number s/yes/no/" /etc/xinetd.d/nrpe
