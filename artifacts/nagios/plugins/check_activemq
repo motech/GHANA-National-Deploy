@@ -1,0 +1,11 @@
+#!/usr/bin/ruby
+
+activemq_host=ARGV[0]
+
+if(ret = %x[curl http://#{activemq_host}:8161/]) =~ /ActiveMQ/
+	puts "activemq OK"
+	exit(0)
+else
+	puts "'curl http://#{activemq_host}:8161' returned #{ret.strip}"
+	exit(2)
+end

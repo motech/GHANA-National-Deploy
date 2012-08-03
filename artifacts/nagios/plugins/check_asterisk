@@ -1,0 +1,121 @@
+#! /usr/bin/perl -w
+     # 
+     # check_ser: Nagios plugin for checking SER using sipsak.
+     # Alex Mayrhofer, nic.at <axelm at nic.at> 
+     # no warranty, licensed GPL2
+     # modified to work with Asterisk by <ricvil at telesip.net> 
+    
+    use strict;
+    use Getopt::Long;
+    use vars qw($opt_w $opt_p $opt_c $opt_U $param $PROGNAME $warning
+    $url $host $password);
+    use lib "/usr/lib/nagios/plugins";
+    use utils qw(%ERRORS &print_revision &support &usage);
+    $PROGNAME="check_asterisk";
+    sub print_help ();
+    sub print_usage ();
+    
+    delete @ENV{'PATH', 'IFS', 'CDPATH', 'ENV', 'BASH_ENV'};
+    
+    Getopt::Long::Configure('bundling', 'no_ignore_case');
+    GetOptions
+    ("V|version"    => \&version,
+     "h|help"       => \&help,
+     "w|warning=s"  => \$opt_w,
+     "c|critical=s" => \$opt_c,
+     "P|port=s" => \$opt_p,
+     "U|url=s" => \$opt_U,);
+    
+    ($opt_U) || ($opt_U = shift) || usage("URL not specified\n");
+    # TODO: allow port and parameters?
+    my $url = $1 if ($opt_U =~ 
+    m/^(sip:[a-zA-Z0-9_\+\*#]+\@[a-zA-Z0-9\.]+)$/);
+    ($url) || usage("Invalid URL: $opt_U\n");
+    
+    ($opt_p) || ($opt_p = shift) || usage("Warning port not specified\n"); 
+    my $port = $1 if ($opt_p =~ /(\d+)$/);
+    ($opt_w) || ($opt_w = shift) || usage("Warning threshold not specified\n");
+    $warning = $1 if ($opt_w =~ /(\d+)$/);
+    ($warning) || usage("Invalid warning threshold: $opt_w\n");
+    ($opt_c) || ($opt_c = shift) || usage("Critical threshold not  specified\n");
+    my $critical = $1 if ($opt_c =~ /(\d+)$/);
+    ($critical) || usage("Invalid critical threshold: $opt_c\n");
+    my $sig=0;
+    my $param=0;
+    
+    #Put UDP port that the Asterisk SIP stack is listening on after the '-r' 
+    
+    $param =  "-s $url -vv -r $port";
+    $sig = `/usr/bin/sipsak $param`;
+    #This condition check for SIP host alive or host not SIP sevice
+    if ($sig =~ m/giving up, no final response after ([0-9\.]+) ms/ || $sig=~m/404 Not Found/) {  
+       printf("SIP CRITICAL MISSING 404 !!!\n");
+       exit $ERRORS{'CRITICAL'};
+    }
+    #This condition check if host not active
+    if($sig=~m/type: 3, code: ([0-9\.]+)/){
+    	$sig = $1;
+    	printf("Destination Unreachable !! ICMP type 3, code $sig\n");
+    	exit $ERRORS{'CRITICAL'};
+    }
+    
+    if ($sig =~ m/reply received after ([0-9\.]+) ms/) {
+    if ($sig =~ m/reply received ([0-9\.]+) ms after first send/) {
+        printf("SIP CRITICAL - missing duration value\n");
+        exit $ERRORS{'CRITICAL'};
+      } else {
+            $sig = $1;
+       }
+    } else {
+      #$sig = $1;
+    	printf("SIP UNKNOWN ERROR\n");
+        	exit $ERRORS{'UNKNOWN'};	
+    }
+    if ($sig>$critical) {
+    printf("SIP CRITICAL - Test Duration: %.2f ms\n",$sig);
+    exit $ERRORS{'CRITICAL'};
+    }
+    
+    if ($sig>$warning) {
+    printf("SIP WARNING - Test Duration: %.2f ms\n",$sig);
+    exit $ERRORS{'WARNING'}
+    }
+    
+    printf("SIP OK - Test Duration: %.2f ms\n",$sig);
+    exit $ERRORS{'OK'};
+    
+    sub print_usage () {
+    print "Usage: $PROGNAME  -U <sip url> -P <sip port> -w <warn> -c <crit>\n";
+    }
+    
+    sub print_help () {
+    print_revision($PROGNAME,'version 0.2 MOD');
+    print "Copyright (c) 2003 nic.at (Alexander Mayrhofer) [Original]
+    Copyright (c) 2006 NGI_Nectec (Sira Ammueang) [MOD]
+    This plugin tests Asterisk SIP Channel.
+    
+    ";
+    print_usage();
+    print "
+    -U, --url=STRING
+      SIP URL to use for check
+    -P, --port=INTEGER
+      SIP PORT
+    -w, --warning=INTEGER
+       response time in ms above which a WARNING status will result
+    -c, --critical=INTEGER
+      response time in ms above which a CRITICAL status will result
+    
+    ";
+    support();
+    }
+    
+    sub version () {
+    print_revision($PROGNAME,'Version: 0.2 MOD');
+    exit $ERRORS{'OK'};
+    }
+    
+    sub help () {
+    print_help();
+    exit $ERRORS{'OK'};
+    }

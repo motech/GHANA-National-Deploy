@@ -1,0 +1,14 @@
+define command{
+	command_name check_nrpe
+	command_line $USER1$/check_nrpe -H $HOSTADDRESS$ -c $ARG1$
+}
+
+define command{
+        command_name check_couchdb
+        command_line $USER1$/check_couchdb $HOSTADDRESS$
+}
+
+define command{
+        command_name check_mysql
+        command_line $USER1$/check_mysql $HOSTADDRESS$ $ARG1$
+}

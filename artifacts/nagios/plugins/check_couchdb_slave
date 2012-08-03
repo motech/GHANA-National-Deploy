@@ -1,0 +1,11 @@
+#!/usr/bin/ruby
+
+couch_host=ARGV[0]
+
+if(ret = %x[curl http://#{couch_host}:5985/]) =~ /Welcome/
+        puts "couchdb OK"
+        exit(0)
+else
+        puts "'curl http://#{couch_host}:5985' returned #{ret.strip}"
+        exit(2)
+end
