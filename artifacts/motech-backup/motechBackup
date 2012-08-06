@@ -9,6 +9,7 @@ start() {
 	touch /tmp/dbBkp.cron
 	echo '0 */4 * * * /root/zipCouchTrigger.sh' > /tmp/dbBkp.cron
 	echo '0 */4 * * * /root/zipMySQLTrigger.sh' >> /tmp/dbBkp.cron
+    echo '0 */5 * * * /root/pokeSlave.sh' >> /tmp/dbBkp.cron
 	crontab /tmp/dbBkp.cron
 	rm /tmp/dbBkp.cron
 }
