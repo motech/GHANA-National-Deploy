@@ -15,7 +15,7 @@ echo "Installing dependencies.."
 yum -y install  mailx sysstat crontabs httpd php gd
 
 echo "Installing nagios with nrpe.."
-yum -y install nagios-plugins nagios-nrpe nagios nagios-plugins-nrpe xinetd sipsak nagios-plugins-perl ruby nagios-plugins-check_sip
+yum -y install nagios-plugins nagios-nrpe nagios nagios-plugins-nrpe xinetd sipsak nagios-plugins-perl ruby nagios-plugins-check_sip nagios-plugins-log
 
 # NRPE: enabling arguments
 sed -i 's/dont_blame_nrpe=0/dont_blame_nrpe=1/g' /etc/nagios/nrpe.cfg
@@ -37,7 +37,7 @@ sed -i "s/#SSH_PORT#/$ssh_port/g" /etc/nagios/objects/remote-host.cfg
 cat ./etc/nagios/objects/commands.cfg.append >> /etc/nagios/objects/commands.cfg
 cat ./etc/nagios/nrpe.cfg.append >> /etc/nagios/nrpe.cfg
 
-sed -i '/cfg_file=\/etc\/nagios\/objects\/localhost.cfg/a #Definitions for Monitoring Remote Host\ncfg_file=\/etc\/nagios\/objects\/remote-host.cfg' /etc/nagios/nagios.cfg
+sed -i 's/cfg_file=\/etc\/nagios\/objects\/localhost.cfg/cfg_file=\/etc\/nagios\/objects\/remote-host.cfg/g' /etc/nagios/nagios.cfg
 
 # edit /etc/servies
 echo "Adding NRPE service in /etc/services.."
@@ -81,3 +81,6 @@ line_number=`iptables -L INPUT --line-numbers -n | grep "dpt:$ssh_port" | cut -d
 /sbin/iptables -I INPUT "$line_number" -p tcp -s $remote_ip --dport 5666 -j ACCEPT
 
 /sbin/iptables-save > /etc/sysconfig/iptables
+
+#Permissions for reading apache logs
+chmod a+rX /var/log/httpd/

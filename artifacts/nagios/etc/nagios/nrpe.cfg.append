@@ -7,3 +7,5 @@ command[check_ram]=/usr/lib64/nagios/plugins/check_ram $ARG1$
 command[check_disk]=/usr/lib64/nagios/plugins/check_disk $ARG1$ -A -i '.gvfs'
 command[check_users]=/usr/lib64/nagios/plugins/check_users $ARG1$
 command[check_asterisk]=/usr/lib64/nagios/plugins/check_asterisk $ARG1$
+command[check_log]=/usr/lib64/nagios/plugins/check_log $ARG1$
+
