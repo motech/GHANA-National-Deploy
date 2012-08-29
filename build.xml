@@ -29,7 +29,8 @@
     </target>
 
     <target name="deploy.batch" description="Install">
-        <deploy url="${tomcat.manager.url}" username="${tomcat.user}" password="${tomcat.password}" path="/${batch.app.name}"
+        <deploy url="${tomcat.manager.url}" username="${tomcat.user}" password="${tomcat.password}"
+                path="/${batch.app.name}"
                 war="file:${download.dir}/${batch.app.name}.war"/>
     </target>
 
@@ -358,14 +359,27 @@
     </target>
 
     <target name="load.audio.files" depends="download.tools.jar,unzip.ghana.national">
-        <delete dir="audio"/>
-        <exec executable="git">
-            <arg value="clone"/>
-            <arg value="--depth"/>
-            <arg value="1"/>
-            <arg value="git@github.com:motech/Ghana-National-Audio.git"/>
-            <arg value="audio"/>
-        </exec>
+        <available file="audio" type="dir" property="audio.dir.present"/>
+        <if>
+            <equals arg1="${audio.dir.present}" arg2="true"/>
+            <then>
+                <echo message="getting the latest audio files."/>
+                <exec executable="git">
+                    <arg value="--git-dir=audio/.git"/>
+                    <arg value="pull"/>
+                    <arg value="origin"/>
+                    <arg value="master"/>
+                </exec>
+            </then>
+            <else>
+                <echo message="cloning audio files directory"/>
+                <exec executable="git">
+                    <arg value="clone"/>
+                    <arg value="git@github.com:motech/Ghana-National-Audio.git"/>
+                    <arg value="audio"/>
+                </exec>
+            </else>
+        </if>
 
         <path id="lib.path">
             <fileset dir="${tomcat.home}/webapps/${app.name}/WEB-INF/lib" includes="**/*.jar"/>
@@ -379,8 +393,7 @@
                 <path refid="lib.path"/>
             </classpath>
         </java>
-        <echo message="seed data loaded into ${couchdb.national.db} database"/>
-
+        <echo message="audio files loaded into ${couchdb.national.db} database"/>
     </target>
 
     <target name="drop.motechmodule.tables">
@@ -535,6 +548,6 @@
                                                         undeploy.openmrs,
                                                         undeploy.national,
                                                         undeploy.batch,
-                                                        deploy.batch" />
+                                                        deploy.batch"/>
 
 </project>
