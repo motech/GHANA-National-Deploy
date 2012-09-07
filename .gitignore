@@ -6,3 +6,4 @@ logs/
 downloads/
 ._.git
 ._.idea
+./artifacts/properties/prod/deploy.properties
