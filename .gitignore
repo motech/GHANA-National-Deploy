@@ -8,3 +8,4 @@ downloads/
 ._.idea
 ./artifacts/properties/prod/deploy.properties
 ./artifacts/properties/qa/deploy.properties
+./artifacts/properties/uat/deploy.properties
